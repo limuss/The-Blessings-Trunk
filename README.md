@@ -1,1 +1,3 @@
- Was Trying out the google ai studio ..  made the structure from GSA and modfying it quite a fewl times then .
+ Made a site for one of my friend for the businedd the structure is by GAIS.. and modified and refined to the current level.
+ soley made in React + Vite 
+ Enjoy the Site.
