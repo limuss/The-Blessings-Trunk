@@ -1,15 +1,22 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
+import OrderModal from '../components/OrderModal';
 
 const Home: React.FC = () => {
   const { hampers, occasions, settings } = useStore();
+  const [modalState, setModalState] = useState<{ open: boolean; product?: string }>({ open: false });
   
   const homeHampers = hampers.filter(h => h.showOnHome);
 
   return (
     <div className="bg-[#FDFBF7]">
+      <OrderModal 
+        isOpen={modalState.open} 
+        onClose={() => setModalState({ open: false })} 
+        productName={modalState.product} 
+      />
+
       {/* Hero Section */}
       <section 
         className="relative min-h-[85vh] flex items-center px-6 md:px-12 py-20 bg-cover bg-center transition-all duration-1000"
@@ -23,23 +30,24 @@ const Home: React.FC = () => {
             Premium dry fruit hampers handcrafted in Jammu & Kashmir—thoughtfully curated for moments that matter.
           </p>
           <div className="flex space-x-4">
-            <Link to="/hampers" className="bg-[#A67C37] text-white px-8 py-3 rounded text-lg hover:bg-[#8B672E] transition-all shadow-md">
+            <button 
+              onClick={() => setModalState({ open: true })}
+              className="bg-[#A67C37] text-white px-8 py-3 rounded text-lg hover:bg-[#8B672E] transition-all shadow-md"
+            >
               Order a Blessing
-            </Link>
-            <Link to="/hampers" className="border border-[#A67C37] text-[#A67C37] px-8 py-3 rounded text-lg hover:bg-[#A67C37] hover:text-white transition-all">
-              Explore Hampers
-            </Link>
+            </button>
           </div>
         </div>
       </section>
 
       {/* Feature Section */}
       <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
-        <div className="flex-1">
+        <div className="flex-1 relative group">
+          <div className="absolute -inset-4 border border-[#E8DFD0] rounded transition-transform group-hover:scale-105"></div>
           <img 
             src="https://images.unsplash.com/photo-1605666118742-5f65a6f2316e?q=80&w=1510&auto=format&fit=crop" 
             alt="Wooden Trunk" 
-            className="rounded shadow-2xl w-full h-[450px] object-cover"
+            className="relative rounded shadow-2xl w-full h-[450px] object-cover"
           />
         </div>
         <div className="flex-1 space-y-6">
@@ -48,20 +56,23 @@ const Home: React.FC = () => {
           <p className="text-lg leading-relaxed text-[#4A3728]">
             {settings.aboutText1}
           </p>
-          <p className="text-lg leading-relaxed text-[#4A3728]">
-            Handcrafted in the heart of Jammu & Kashmir, each gift is a gesture of warmth and tradition.
-          </p>
+          <button 
+            onClick={() => setModalState({ open: true, product: 'Custom Hamper' })}
+            className="text-[#A67C37] font-bold uppercase tracking-widest text-sm border-b-2 border-[#A67C37] pb-1 hover:text-[#3D2B1F] hover:border-[#3D2B1F] transition-all"
+          >
+            Curate Your Own
+          </button>
         </div>
       </section>
 
       {/* Occasions Section */}
       <section className="py-24 bg-[#F7F3EC] px-6 md:px-12 text-center">
         <h2 className="text-4xl serif italic text-[#3D2B1F] mb-16">Blessings for Every Occasion</h2>
-        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {occasions.map((occ) => (
-            <div key={occ.id} className="bg-white rounded p-4 shadow-sm hover:shadow-md transition-shadow group">
+            <div key={occ.id} className="bg-white rounded p-4 shadow-sm hover:shadow-xl transition-all group cursor-pointer" onClick={() => setModalState({ open: true, product: occ.title })}>
               <div className="overflow-hidden mb-6 aspect-square">
-                <img src={occ.image} alt={occ.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <img src={occ.image} alt={occ.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               </div>
               <h3 className="text-xl serif mb-4">{occ.title}</h3>
               <div className="flex justify-center">
@@ -85,9 +96,12 @@ const Home: React.FC = () => {
               <p className="text-[#A67C37] font-semibold mb-6">Starting from ₹ {hamper.price}</p>
               <div className="w-full flex items-center justify-center space-x-4 mb-6 px-4">
                 <div className="flex-grow h-[1px] bg-[#E8DFD0]"></div>
-                <Link to="/order" className="bg-[#A67C37] text-white px-10 py-2.5 hover:bg-[#8B672E] transition-colors uppercase text-sm tracking-widest font-semibold whitespace-nowrap">
+                <button 
+                  onClick={() => setModalState({ open: true, product: hamper.name })}
+                  className="bg-[#A67C37] text-white px-10 py-2.5 hover:bg-[#8B672E] transition-colors uppercase text-sm tracking-widest font-semibold whitespace-nowrap"
+                >
                   Order Now
-                </Link>
+                </button>
                 <div className="flex-grow h-[1px] bg-[#E8DFD0]"></div>
               </div>
             </div>

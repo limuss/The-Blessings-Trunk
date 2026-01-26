@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+// Fix: Ensure Link is imported correctly from react-router-dom to fix named export error.
 import { Link } from 'react-router-dom';
 
 const Navbar: React.FC = () => {

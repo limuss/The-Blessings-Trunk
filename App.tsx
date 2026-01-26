@@ -1,5 +1,6 @@
 
 import React from 'react';
+// Use MemoryRouter instead of HashRouter to avoid security restrictions on location manipulation in the blob-origin sandbox environment.
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
