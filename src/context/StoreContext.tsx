@@ -7,20 +7,30 @@ interface StoreContextType {
   occasions: Occasion[];
   settings: SiteSettings;
   mediaLibrary: MediaItem[];
-  // Settings operations
+  isLoading: boolean;
   updateSettings: (settings: SiteSettings) => void;
-  // Hamper operations
   addHamper: (hamper: Hamper) => void;
   updateHamper: (hamper: Hamper) => void;
   deleteHamper: (id: string) => void;
-  // Occasion operations
   addOccasion: (occasion: Occasion) => void;
   updateOccasion: (occasion: Occasion) => void;
   deleteOccasion: (id: string) => void;
-  // Media operations
   addToMediaLibrary: (item: MediaItem) => void;
   removeFromMediaLibrary: (id: string) => void;
+  syncToCloud: () => Promise<void>;
+  fetchFromCloud: () => Promise<void>;
 }
+
+const DB_NAME = 'BlessingsTrunkDB';
+const STORE_NAME = 'media';
+
+// IndexedDB Helper for Large Assets
+const getDB = () => new Promise<IDBDatabase>((resolve, reject) => {
+  const request = indexedDB.open(DB_NAME, 1);
+  request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME, { keyPath: 'id' });
+  request.onsuccess = () => resolve(request.result);
+  request.onerror = () => reject(request.error);
+});
 
 const defaultSettings: SiteSettings = {
   phoneNumber: '+91 88990 43549',
@@ -40,86 +50,115 @@ const defaultSettings: SiteSettings = {
   gasEndpoint: 'https://script.google.com/macros/s/AKfycbzEzTXIUGapqsQeptHT-qQzlRyKP7-SLmb87J6KoSzBpgvGI5MtUaB2Ag8VvEuBiWfOVQ/exec',
 };
 
-const defaultHampers: Hamper[] = [
-  { id: '1', name: 'Royal Saffron Trunk', description: 'Large walnut trunk, all premium varieties.', price: '4,500', image: 'https://images.unsplash.com/photo-1606830733744-0ad778449672?q=80&w=600&auto=format&fit=crop', category: 'Wooden Trunk', showOnHome: true, showOnHampers: true, isSuggested: true },
-  { id: '2', name: 'Heritage Walnut Collection', description: 'Handcrafted walnut box with premium dry fruits.', price: '5,200', image: 'https://images.unsplash.com/photo-1605666118742-5f65a6f2316e?q=80&w=600&auto=format&fit=crop', category: 'Wooden Trunk', showOnHome: true, showOnHampers: true, isSuggested: true },
-  { id: '3', name: 'Eid Mubarak Box', description: 'Vibrant festival box for special occasions.', price: '3,800', image: 'https://images.unsplash.com/photo-1598124838120-020bc4155916?q=80&w=600&auto=format&fit=crop', category: 'Festival Special', showOnHome: true, showOnHampers: true, isSuggested: true },
-];
-
-const defaultOccasions: Occasion[] = [
-  { id: '1', title: 'Eid Blessings', image: 'https://images.unsplash.com/photo-1598124838120-020bc4155916?q=80&w=1470&auto=format&fit=crop' },
-  { id: '2', title: 'Diwali Gifting', image: 'https://images.unsplash.com/photo-1543007630-9710e4a00a20?q=80&w=1548&auto=format&fit=crop' },
-  { id: '3', title: 'Newborn Joy', image: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=1470&auto=format&fit=crop' },
-];
-
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [hampers, setHampers] = useState<Hamper[]>(() => {
-    const saved = localStorage.getItem('bt_hampers');
-    return saved ? JSON.parse(saved) : defaultHampers;
-  });
+  const [hampers, setHampers] = useState<Hamper[]>([]);
+  const [occasions, setOccasions] = useState<Occasion[]>([]);
+  const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
+  const [mediaLibrary, setMediaLibrary] = useState<MediaItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [occasions, setOccasions] = useState<Occasion[]>(() => {
-    const saved = localStorage.getItem('bt_occasions');
-    return saved ? JSON.parse(saved) : defaultOccasions;
-  });
-
-  const [settings, setSettings] = useState<SiteSettings>(() => {
-    const saved = localStorage.getItem('bt_settings');
-    return saved ? JSON.parse(saved) : defaultSettings;
-  });
-
-  const [mediaLibrary, setMediaLibrary] = useState<MediaItem[]>(() => {
-    const saved = localStorage.getItem('bt_media');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  useEffect(() => localStorage.setItem('bt_hampers', JSON.stringify(hampers)), [hampers]);
-  useEffect(() => localStorage.setItem('bt_occasions', JSON.stringify(occasions)), [occasions]);
-  useEffect(() => localStorage.setItem('bt_settings', JSON.stringify(settings)), [settings]);
-  useEffect(() => localStorage.setItem('bt_media', JSON.stringify(mediaLibrary)), [mediaLibrary]);
-
-  // Visitor Notification
+  // Load from local storage and IndexedDB on start
   useEffect(() => {
-    const sessionKey = 'bt_notified_visit';
-    if (!sessionStorage.getItem(sessionKey) && settings.gasEndpoint) {
-      fetch(settings.gasEndpoint, {
+    const init = async () => {
+      try {
+        const savedHampers = localStorage.getItem('bt_hampers');
+        const savedOccasions = localStorage.getItem('bt_occasions');
+        const savedSettings = localStorage.getItem('bt_settings');
+        
+        if (savedHampers) setHampers(JSON.parse(savedHampers));
+        if (savedOccasions) setOccasions(JSON.parse(savedOccasions));
+        if (savedSettings) setSettings(JSON.parse(savedSettings));
+
+        const db = await getDB();
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.getAll();
+        request.onsuccess = () => setMediaLibrary(request.result);
+      } catch (e) {
+        console.error('Initialization failed:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    init();
+  }, []);
+
+  // Sync state to local storage (Hampers/Occasions/Settings are small)
+  useEffect(() => { if (!isLoading) localStorage.setItem('bt_hampers', JSON.stringify(hampers)); }, [hampers, isLoading]);
+  useEffect(() => { if (!isLoading) localStorage.setItem('bt_occasions', JSON.stringify(occasions)); }, [occasions, isLoading]);
+  useEffect(() => { if (!isLoading) localStorage.setItem('bt_settings', JSON.stringify(settings)); }, [settings, isLoading]);
+
+  const addToMediaLibrary = async (item: MediaItem) => {
+    setMediaLibrary(prev => [item, ...prev]);
+    const db = await getDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put(item);
+  };
+
+  const removeFromMediaLibrary = async (id: string) => {
+    setMediaLibrary(prev => prev.filter(m => m.id !== id));
+    const db = await getDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).delete(id);
+  };
+
+  const fetchFromCloud = async () => {
+    if (!settings.gasEndpoint) return;
+    setIsLoading(true);
+    try {
+      const resp = await fetch(`${settings.gasEndpoint}?action=getData`);
+      const cloudData = await resp.json();
+      if (cloudData.hampers) setHampers(cloudData.hampers);
+      if (cloudData.occasions) setOccasions(cloudData.occasions);
+      if (cloudData.settings) setSettings(cloudData.settings);
+      if (cloudData.media) {
+         setMediaLibrary(cloudData.media);
+         const db = await getDB();
+         const tx = db.transaction(STORE_NAME, 'readwrite');
+         const store = tx.objectStore(STORE_NAME);
+         store.clear();
+         cloudData.media.forEach((item: MediaItem) => store.put(item));
+      }
+    } catch (e) {
+      console.error('Cloud fetch failed:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const syncToCloud = async () => {
+    if (!settings.gasEndpoint) return;
+    try {
+      await fetch(settings.gasEndpoint, {
         method: 'POST',
         mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'visit',
-          data: {
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent
-          }
+          action: 'syncAll',
+          data: { hampers, occasions, settings, media: mediaLibrary }
         })
-      }).catch(err => console.debug('Visit ping failed:', err));
-      sessionStorage.setItem(sessionKey, 'true');
+      });
+      alert('Changes published to cloud successfully!');
+    } catch (e) {
+      alert('Cloud sync failed. Check console for details.');
     }
-  }, [settings.gasEndpoint]);
+  };
 
-  const updateSettings = (newSettings: SiteSettings) => setSettings(newSettings);
-
+  const updateSettings = (s: SiteSettings) => setSettings(s);
   const addHamper = (h: Hamper) => setHampers(prev => [...prev, h]);
-  const updateHamper = (h: Hamper) => setHampers(prev => prev.map(item => item.id === h.id ? h : item));
-  const deleteHamper = (id: string) => setHampers(prev => prev.filter(item => item.id !== id));
-
+  const updateHamper = (h: Hamper) => setHampers(prev => prev.map(i => i.id === h.id ? h : i));
+  const deleteHamper = (id: string) => setHampers(prev => prev.filter(i => i.id !== id));
   const addOccasion = (o: Occasion) => setOccasions(prev => [...prev, o]);
-  const updateOccasion = (o: Occasion) => setOccasions(prev => prev.map(item => item.id === o.id ? o : item));
-  const deleteOccasion = (id: string) => setOccasions(prev => prev.filter(item => item.id !== id));
-  
-  const addToMediaLibrary = (item: MediaItem) => setMediaLibrary(prev => [item, ...prev]);
-  const removeFromMediaLibrary = (id: string) => setMediaLibrary(prev => prev.filter(m => m.id !== id));
+  const updateOccasion = (o: Occasion) => setOccasions(prev => prev.map(i => i.id === o.id ? o : i));
+  const deleteOccasion = (id: string) => setOccasions(prev => prev.filter(i => i.id !== id));
 
   return (
     <StoreContext.Provider value={{ 
-      hampers, occasions, settings, mediaLibrary, 
-      updateSettings,
-      addHamper, updateHamper, deleteHamper,
+      hampers, occasions, settings, mediaLibrary, isLoading,
+      updateSettings, addHamper, updateHamper, deleteHamper,
       addOccasion, updateOccasion, deleteOccasion,
-      addToMediaLibrary, removeFromMediaLibrary 
+      addToMediaLibrary, removeFromMediaLibrary, syncToCloud, fetchFromCloud
     }}>
       {children}
     </StoreContext.Provider>
