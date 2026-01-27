@@ -16,6 +16,8 @@ const Admin: React.FC = () => {
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState<'hampers' | 'occasions' | 'media' | 'settings'>('hampers');
   const [isUploading, setIsUploading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncSuccess, setSyncSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Editing States
@@ -40,6 +42,19 @@ const Admin: React.FC = () => {
   const openImagePicker = (callback: (url: string) => void) => {
     setPickerCallback(() => callback);
     setIsImagePickerOpen(true);
+  };
+
+  const handleCloudSync = async () => {
+    setIsSyncing(true);
+    setSyncSuccess(false);
+    const success = await syncToCloud();
+    setIsSyncing(false);
+    if (success) {
+      setSyncSuccess(true);
+      setTimeout(() => setSyncSuccess(false), 5000);
+    } else {
+      alert('Cloud synchronization failed. Please check your network or GAS endpoint.');
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,6 +144,7 @@ const Admin: React.FC = () => {
       heroTitle: formData.get('heroTitle') as string,
       heroSubtitle: formData.get('heroSubtitle') as string,
       heroImage: formData.get('heroImage') as string,
+      homeFeatureImage: formData.get('homeFeatureImage') as string,
       proprietorName: formData.get('proprietorName') as string,
       phoneNumber: formData.get('phoneNumber') as string,
       whatsappNumber: formData.get('whatsappNumber') as string,
@@ -179,25 +195,40 @@ const Admin: React.FC = () => {
             <h1 className="text-4xl serif text-[#3D2B1F]">Owner's Dashboard</h1>
             <p className="text-[#8B735B] italic">Using IndexedDB for high-res image persistence</p>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex flex-col md:flex-row items-end md:items-center space-y-4 md:space-y-0 md:space-x-4">
             <button 
               onClick={fetchFromCloud}
               className="px-6 py-2 border-2 border-[#A67C37] text-[#A67C37] rounded-full text-sm font-bold hover:bg-[#A67C37] hover:text-white transition-all"
             >
               Fetch from Cloud
             </button>
-            <button 
-              onClick={syncToCloud}
-              className="bg-[#3D2B1F] text-white px-8 py-2 rounded-full text-sm font-bold hover:bg-[#A67C37] transition-all shadow-lg"
-            >
-              Publish Changes
-            </button>
+            <div className="relative">
+              <button 
+                onClick={handleCloudSync}
+                disabled={isSyncing}
+                className={`bg-[#3D2B1F] text-white px-8 py-2 rounded-full text-sm font-bold hover:bg-[#A67C37] transition-all shadow-lg flex items-center space-x-2 ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {isSyncing ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span>Publishing...</span>
+                  </>
+                ) : (
+                  <span>Publish Changes</span>
+                )}
+              </button>
+              {syncSuccess && (
+                <div className="absolute top-full right-0 mt-2 bg-green-500 text-white text-[10px] font-bold py-1 px-3 rounded-full animate-in fade-in slide-in-from-top-1">
+                  Successfully Synced!
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
-        {isLoading && (
+        {(isLoading || isSyncing) && (
           <div className="bg-[#F7F3EC] p-4 text-center rounded-xl mb-8 animate-pulse text-[#3D2B1F] font-bold">
-            Synchronizing data with database...
+            {isSyncing ? 'Writing changes to cloud database...' : 'Synchronizing data with database...'}
           </div>
         )}
 
@@ -313,12 +344,28 @@ const Admin: React.FC = () => {
             <form onSubmit={handleSettingsSubmit} className="bg-white p-10 rounded-3xl border border-[#E8DFD0] space-y-12 max-w-5xl shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div className="space-y-6">
-                  <h3 className="text-sm uppercase tracking-[0.2em] text-[#A67C37] font-bold border-b border-[#F7F3EC] pb-3">Hero Content</h3>
-                  <div><label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Hero Title</label><input name="heroTitle" defaultValue={settings.heroTitle} className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm focus:border-[#A67C37] outline-none" /></div>
-                  <div><label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Hero Subtitle</label><input name="heroSubtitle" defaultValue={settings.heroSubtitle} className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm focus:border-[#A67C37] outline-none" /></div>
+                  <h3 className="text-sm uppercase tracking-[0.2em] text-[#A67C37] font-bold border-b border-[#F7F3EC] pb-3">Home Page Layout</h3>
                   <div>
-                    <label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Hero Image URL</label>
-                    <div className="flex gap-2"><input id="settings-heroImage" name="heroImage" defaultValue={settings.heroImage} className="flex-grow border border-[#E8DFD0] rounded-xl px-4 py-3 text-xs focus:border-[#A67C37] outline-none" /><button type="button" onClick={() => openImagePicker((url) => { const el = document.getElementById('settings-heroImage') as HTMLInputElement; if (el) el.value = url; })} className="px-4 bg-[#F7F3EC] rounded-xl hover:bg-[#E8DFD0] text-[#3D2B1F]"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></button></div>
+                    <label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Hero Title</label>
+                    <input name="heroTitle" defaultValue={settings.heroTitle} className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm focus:border-[#A67C37] outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Hero Subtitle</label>
+                    <input name="heroSubtitle" defaultValue={settings.heroSubtitle} className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm focus:border-[#A67C37] outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Hero Background Image</label>
+                    <div className="flex gap-2">
+                      <input id="settings-heroImage" name="heroImage" defaultValue={settings.heroImage} className="flex-grow border border-[#E8DFD0] rounded-xl px-4 py-3 text-xs focus:border-[#A67C37] outline-none" />
+                      <button type="button" onClick={() => openImagePicker((url) => { const el = document.getElementById('settings-heroImage') as HTMLInputElement; if (el) el.value = url; })} className="px-4 bg-[#F7F3EC] rounded-xl hover:bg-[#E8DFD0] text-[#3D2B1F]"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Feature Section Image (2nd Section)</label>
+                    <div className="flex gap-2">
+                      <input id="settings-homeFeatureImage" name="homeFeatureImage" defaultValue={settings.homeFeatureImage} className="flex-grow border border-[#E8DFD0] rounded-xl px-4 py-3 text-xs focus:border-[#A67C37] outline-none" />
+                      <button type="button" onClick={() => openImagePicker((url) => { const el = document.getElementById('settings-homeFeatureImage') as HTMLInputElement; if (el) el.value = url; })} className="px-4 bg-[#F7F3EC] rounded-xl hover:bg-[#E8DFD0] text-[#3D2B1F]"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-6">
