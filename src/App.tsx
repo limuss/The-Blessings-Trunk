@@ -32,6 +32,31 @@ const App: React.FC = () => {
               <Route path="/occasions" element={<Home />} />
             </Routes>
           </main>
+          <button
+  style={{
+    padding: "12px 20px",
+    background: "#4A3728",
+    color: "white",
+    margin: "20px",
+    borderRadius: "6px"
+  }}
+  onClick={async () => {
+    await fetch(GAS_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "order",
+        email: "frontend-test@example.com",
+        phone: "+91 88888 88888"
+      })
+    });
+
+    alert("Request sent from frontend");
+  }}
+>
+  TEST EMAIL FROM FRONTEND
+</button>
+
           <Footer />
           <ChatBot />
         </div>
