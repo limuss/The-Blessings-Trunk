@@ -37,6 +37,7 @@ export interface SiteSettings {
   heroTitle: string;
   heroSubtitle: string;
   heroImage: string;
+  homeFeatureImage: string; // New field
   aboutTitle: string;
   aboutText1: string;
   aboutText2: string;
