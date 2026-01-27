@@ -17,20 +17,61 @@ interface StoreContextType {
   deleteOccasion: (id: string) => void;
   addToMediaLibrary: (item: MediaItem) => void;
   removeFromMediaLibrary: (id: string) => void;
-  syncToCloud: () => Promise<void>;
+  syncToCloud: () => Promise<boolean>;
   fetchFromCloud: () => Promise<void>;
 }
 
 const DB_NAME = 'BlessingsTrunkDB';
 const STORE_NAME = 'media';
 
-// IndexedDB Helper for Large Assets
 const getDB = () => new Promise<IDBDatabase>((resolve, reject) => {
   const request = indexedDB.open(DB_NAME, 1);
   request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME, { keyPath: 'id' });
   request.onsuccess = () => resolve(request.result);
   request.onerror = () => reject(request.error);
 });
+
+const defaultHampers: Hamper[] = [
+  {
+    id: '1',
+    name: 'Royal Kashmiri Trunk',
+    description: 'A grand wooden trunk featuring a premium selection of Mamra almonds, walnuts, and pure saffron.',
+    price: '4500',
+    image: 'https://images.unsplash.com/photo-1606830733744-0ad778449672?q=80&w=800&auto=format&fit=crop',
+    category: 'Wooden Trunk',
+    showOnHome: true,
+    showOnHampers: true,
+    isSuggested: true
+  },
+  {
+    id: '2',
+    name: 'Saffron & Gold Delight',
+    description: 'An elegant festive box centered around Grade-A Kashmiri Saffron and sun-dried apricots.',
+    price: '3200',
+    image: 'https://images.unsplash.com/photo-1590080876118-20d20d4f3b7c?q=80&w=800&auto=format&fit=crop',
+    category: 'Festival Special',
+    showOnHome: true,
+    showOnHampers: true,
+    isSuggested: false
+  },
+  {
+    id: '3',
+    name: 'The Nurture Box',
+    description: 'Thoughtfully curated for wellness, featuring energy-rich nuts and traditional Kashmiri herbs.',
+    price: '2800',
+    image: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=800&auto=format&fit=crop',
+    category: 'Custom Blessing',
+    showOnHome: true,
+    showOnHampers: true,
+    isSuggested: true
+  }
+];
+
+const defaultOccasions: Occasion[] = [
+  { id: 'occ-1', title: 'Grand Weddings', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop' },
+  { id: 'occ-2', title: 'Eid Celebrations', image: 'https://images.unsplash.com/photo-1564769662533-4f00a87b4056?q=80&w=800&auto=format&fit=crop' },
+  { id: 'occ-3', title: 'Corporate Gifting', image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=800&auto=format&fit=crop' }
+];
 
 const defaultSettings: SiteSettings = {
   phoneNumber: '+91 88990 43549',
@@ -43,6 +84,7 @@ const defaultSettings: SiteSettings = {
   heroTitle: 'The Blessings Trunk',
   heroSubtitle: 'A trunk full of love, warmth & heartfelt wishes',
   heroImage: 'https://images.unsplash.com/photo-1606830733744-0ad778449672?q=80&w=2000&auto=format&fit=crop',
+  homeFeatureImage: 'https://images.unsplash.com/photo-1605666118742-5f65a6f2316e?q=80&w=1510&auto=format&fit=crop',
   aboutTitle: 'Gifting with Emotion',
   aboutText1: 'The Blessings Trunk was founded on a simple belief: a gift is more than its contents; it is a physical manifestation of a blessing.',
   aboutText2: 'Every almond, every walnut, and every thread of saffron is sourced with reverence for the land and the hands that harvest it.',
@@ -59,7 +101,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [mediaLibrary, setMediaLibrary] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load from local storage and IndexedDB on start
   useEffect(() => {
     const init = async () => {
       try {
@@ -68,7 +109,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const savedSettings = localStorage.getItem('bt_settings');
         
         if (savedHampers) setHampers(JSON.parse(savedHampers));
+        else setHampers(defaultHampers);
+
         if (savedOccasions) setOccasions(JSON.parse(savedOccasions));
+        else setOccasions(defaultOccasions);
+
         if (savedSettings) setSettings(JSON.parse(savedSettings));
 
         const db = await getDB();
@@ -85,7 +130,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     init();
   }, []);
 
-  // Sync state to local storage (Hampers/Occasions/Settings are small)
   useEffect(() => { if (!isLoading) localStorage.setItem('bt_hampers', JSON.stringify(hampers)); }, [hampers, isLoading]);
   useEffect(() => { if (!isLoading) localStorage.setItem('bt_occasions', JSON.stringify(occasions)); }, [occasions, isLoading]);
   useEffect(() => { if (!isLoading) localStorage.setItem('bt_settings', JSON.stringify(settings)); }, [settings, isLoading]);
@@ -128,20 +172,24 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const syncToCloud = async () => {
-    if (!settings.gasEndpoint) return;
+  const syncToCloud = async (): Promise<boolean> => {
+    if (!settings.gasEndpoint) return false;
     try {
+      // GAS often fails CORS, but no-cors still sends the request successfully.
       await fetch(settings.gasEndpoint, {
         method: 'POST',
         mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'syncAll',
           data: { hampers, occasions, settings, media: mediaLibrary }
         })
       });
-      alert('Changes published to cloud successfully!');
+      // In no-cors, we can't read the response, so we assume success if no error is thrown
+      return true;
     } catch (e) {
-      alert('Cloud sync failed. Check console for details.');
+      console.error('Sync error:', e);
+      return false;
     }
   };
 
