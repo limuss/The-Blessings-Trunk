@@ -45,8 +45,8 @@ const Home: React.FC = () => {
         <div className="flex-1 relative group">
           <div className="absolute -inset-4 border border-[#E8DFD0] rounded transition-transform group-hover:scale-105"></div>
           <img 
-            src="https://images.unsplash.com/photo-1605666118742-5f65a6f2316e?q=80&w=1510&auto=format&fit=crop" 
-            alt="Wooden Trunk" 
+            src={settings.homeFeatureImage} 
+            alt="Wooden Trunk Feature" 
             className="relative rounded shadow-2xl w-full h-[450px] object-cover"
           />
         </div>
