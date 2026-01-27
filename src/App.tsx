@@ -12,6 +12,10 @@ import Admin from './pages/Admin';
 import ChatBot from './components/ChatBot';
 import { StoreProvider } from './context/StoreContext';
 
+const GAS_ENDPOINT =
+  "https://script.google.com/macros/s/AKfycbzEzTXIUGapqsQeptHT-qQzlRyKP7-SLmb87J6KoSzBpgvGI5MtUaB2Ag8VvEuBiWfOVQ/exec";
+
+
 const App: React.FC = () => {
   return (
     <StoreProvider>
