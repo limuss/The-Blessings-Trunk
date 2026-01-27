@@ -1,4 +1,7 @@
 
+console.log("INDEX.TSX IS RUNNING");
+
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
