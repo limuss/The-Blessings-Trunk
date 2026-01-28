@@ -4,13 +4,6 @@ import { Hamper, SiteSettings, MediaItem, ShopLocation } from '../types';
 import { auth } from '../services/firebase';
 import firebase from 'firebase/compat/app';
 
-// Authorized admin list as requested
-const ALLOWED_ADMIN_EMAILS = [
-  'muslimnazirlonekmr@gmail.com',
-  'limuss64@gmail.com',
-  'theblessingstrunk@gmail.com'
-];
-
 const Admin: React.FC = () => {
   const { 
     hampers, settings, mediaLibrary,
@@ -34,13 +27,8 @@ const Admin: React.FC = () => {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user && user.email && !ALLOWED_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
-        auth.signOut();
-        setCurrentUser(null);
-        setAuthError("you are not the admin or you don't have the admin rights please explore the site as a user");
-      } else {
-        setCurrentUser(user);
-      }
+      // Admin status is managed via Firebase console/authentication settings.
+      setCurrentUser(user);
       setIsAuthLoading(false);
     });
     return () => unsubscribe();
@@ -50,18 +38,12 @@ const Admin: React.FC = () => {
     e.preventDefault();
     setAuthError('');
 
-    if (!ALLOWED_ADMIN_EMAILS.includes(email.toLowerCase())) {
-      setAuthError("you are not the admin or you don't have the admin rights please explore the site as a user");
-      return;
-    }
-
     try {
-      // Only Sign In is allowed now
       await auth.signInWithEmailAndPassword(email, password);
     } catch (error: any) {
       console.error("Auth error:", error);
       if (error.code === 'auth/unauthorized-domain') {
-        setAuthError('This domain is not authorized in your Firebase Project. Go to Firebase Console > Authentication > Settings > Authorized Domains.');
+        setAuthError('This domain is not authorized in your Firebase Project.');
       } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
         setAuthError('Email or password is incorrect');
       } else {
