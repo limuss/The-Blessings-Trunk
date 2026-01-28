@@ -1,64 +1,80 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
-import { Hamper, SiteSettings, Occasion, MediaItem } from '../types';
+import { Hamper, SiteSettings, MediaItem, ShopLocation } from '../types';
+import { auth } from '../services/firebase';
+import firebase from 'firebase/compat/app';
+
+// Authorized admin list as requested
+const ALLOWED_ADMIN_EMAILS = [
+  'muslimnazirlonekmr@gmail.com',
+  'limuss64@gmail.com',
+  'theblessingstrunk@gmail.com'
+];
 
 const Admin: React.FC = () => {
   const { 
-    hampers, occasions, settings, mediaLibrary, isLoading,
+    hampers, settings, mediaLibrary,
     updateSettings, addHamper, updateHamper, deleteHamper,
-    addOccasion, updateOccasion, deleteOccasion,
-    addToMediaLibrary, removeFromMediaLibrary, syncToCloud, fetchFromCloud
+    addToMediaLibrary, removeFromMediaLibrary
   } = useStore();
   
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
+  const [currentUser, setCurrentUser] = useState<firebase.User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [activeTab, setActiveTab] = useState<'hampers' | 'occasions' | 'media' | 'settings'>('hampers');
+  const [authError, setAuthError] = useState('');
+
+  const [activeTab, setActiveTab] = useState<'hampers' | 'media' | 'settings'>('hampers');
   const [isUploading, setIsUploading] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Editing States
   const [editingHamper, setEditingHamper] = useState<Hamper | null>(null);
   const [isHamperModalOpen, setIsHamperModalOpen] = useState(false);
-  const [editingOccasion, setEditingOccasion] = useState<Occasion | null>(null);
-  const [isOccasionModalOpen, setIsOccasionModalOpen] = useState(false);
 
-  // Image Picker Logic
-  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
-  const [pickerCallback, setPickerCallback] = useState<(url: string) => void>(() => {});
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user && user.email && !ALLOWED_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+        auth.signOut();
+        setCurrentUser(null);
+        setAuthError("you are not the admin or you don't have the admin rights please explore the site as a user");
+      } else {
+        setCurrentUser(user);
+      }
+      setIsAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'AzharMajeed' && password === 'TheBlessingTrunk@90') {
-      setIsAuthenticated(true);
-    } else {
-      alert('Invalid credentials');
+    setAuthError('');
+
+    if (!ALLOWED_ADMIN_EMAILS.includes(email.toLowerCase())) {
+      setAuthError("you are not the admin or you don't have the admin rights please explore the site as a user");
+      return;
+    }
+
+    try {
+      // Only Sign In is allowed now
+      await auth.signInWithEmailAndPassword(email, password);
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      if (error.code === 'auth/unauthorized-domain') {
+        setAuthError('This domain is not authorized in your Firebase Project. Go to Firebase Console > Authentication > Settings > Authorized Domains.');
+      } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+        setAuthError('Email or password is incorrect');
+      } else {
+        setAuthError(error.message);
+      }
     }
   };
 
-  const openImagePicker = (callback: (url: string) => void) => {
-    setPickerCallback(() => callback);
-    setIsImagePickerOpen(true);
-  };
-
-  const handleCloudSync = async () => {
-    setIsSyncing(true);
-    setSyncStatus(null);
+  const handleLogout = async () => {
     try {
-      const success = await syncToCloud();
-      if (success) {
-        setSyncStatus({ type: 'success', message: 'Changes Published! Your site is up to date.' });
-        setTimeout(() => setSyncStatus(null), 5000);
-      } else {
-        setSyncStatus({ type: 'error', message: 'Cloud sync failed. Check your GAS endpoint in settings.' });
-      }
-    } catch (err) {
-      setSyncStatus({ type: 'error', message: 'An unexpected error occurred during sync.' });
-    } finally {
-      setIsSyncing(false);
+      await auth.signOut();
+    } catch (error) {
+      console.error("Logout error", error);
     }
   };
 
@@ -70,8 +86,6 @@ const Admin: React.FC = () => {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64String = event.target?.result as string;
-      const base64Data = base64String.split(',')[1];
-      
       try {
         const newItem: MediaItem = {
           id: Date.now().toString(),
@@ -81,21 +95,9 @@ const Admin: React.FC = () => {
           uploadedAt: new Date().toISOString(),
         };
         await addToMediaLibrary(newItem);
-        
-        if (settings.gasEndpoint) {
-          fetch(settings.gasEndpoint, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({
-              action: 'upload',
-              data: { filename: file.name, mimeType: file.type, base64: base64Data }
-            })
-          }).catch(console.error);
-        }
         setSyncStatus({ type: 'success', message: 'Image added to local library!' });
         setTimeout(() => setSyncStatus(null), 3000);
       } catch (error) {
-        console.error('Upload error:', error);
         setSyncStatus({ type: 'error', message: 'Failed to store image locally.' });
       } finally {
         setIsUploading(false);
@@ -120,37 +122,22 @@ const Admin: React.FC = () => {
       showOnHampers: formData.get('showOnHampers') === 'on',
       isSuggested: formData.get('isSuggested') === 'on',
     };
-
     if (editingHamper) updateHamper(h);
     else addHamper(h);
-    
     setIsHamperModalOpen(false);
     setEditingHamper(null);
-    setSyncStatus({ type: 'success', message: 'Hamper saved. Click "Publish to Site" to sync.' });
-    setTimeout(() => setSyncStatus(null), 3000);
-  };
-
-  const saveOccasion = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const o: Occasion = {
-      id: editingOccasion?.id || Date.now().toString(),
-      title: formData.get('title') as string,
-      image: formData.get('image') as string,
-    };
-
-    if (editingOccasion) updateOccasion(o);
-    else addOccasion(o);
-    
-    setIsOccasionModalOpen(false);
-    setEditingOccasion(null);
-    setSyncStatus({ type: 'success', message: 'Occasion saved. Click "Publish to Site" to sync.' });
-    setTimeout(() => setSyncStatus(null), 3000);
   };
 
   const handleSettingsSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    const shops: ShopLocation[] = [1, 2, 3].map(num => ({
+      id: `shop-${num}`,
+      name: formData.get(`shop${num}_name`) as string,
+      address: formData.get(`shop${num}_address`) as string,
+      lat: parseFloat(formData.get(`shop${num}_lat`) as string),
+      lng: parseFloat(formData.get(`shop${num}_lng`) as string)
+    }));
     const newSettings: SiteSettings = {
       ...settings,
       heroTitle: formData.get('heroTitle') as string,
@@ -165,36 +152,66 @@ const Admin: React.FC = () => {
       aboutText1: formData.get('aboutText1') as string,
       aboutText2: formData.get('aboutText2') as string,
       aboutQuote: formData.get('aboutQuote') as string,
+      shops: shops
     };
     updateSettings(newSettings);
-    setSyncStatus({ type: 'success', message: 'Settings applied locally. Publish to save permanently.' });
+    setSyncStatus({ type: 'success', message: 'Settings applied locally.' });
     setTimeout(() => setSyncStatus(null), 4000);
   };
 
-  if (!isAuthenticated) {
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center bg-[#FDFBF7]">
+        <div className="animate-spin h-10 w-10 border-4 border-[#A67C37] border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center bg-[#FDFBF7] p-6">
         <div className="bg-white p-10 rounded-3xl shadow-2xl border border-[#E8DFD0] w-full max-w-md">
-          <h1 className="text-3xl serif text-[#3D2B1F] mb-8 text-center font-bold">Admin Access</h1>
-          <form onSubmit={handleLogin} className="space-y-6">
-            <input 
-              type="text" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full border-b-2 border-[#E8DFD0] py-2 focus:outline-none focus:border-[#A67C37] bg-transparent text-[#3D2B1F]"
-              placeholder="Username"
-            />
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border-b-2 border-[#E8DFD0] py-2 focus:outline-none focus:border-[#A67C37] bg-transparent text-[#3D2B1F]"
-              placeholder="Password"
-            />
-            <button type="submit" className="w-full bg-[#3D2B1F] text-white py-3 rounded-full hover:bg-[#A67C37] transition-all font-semibold shadow-lg">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl serif text-[#3D2B1F] font-bold">Admin Portal</h1>
+            <p className="text-[#8B735B] text-sm mt-2">Sign in to your dashboard</p>
+          </div>
+          
+          <form onSubmit={handleAuth} className="space-y-6">
+            {authError && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-xl text-xs font-bold border border-red-100 animate-in shake duration-300">
+                {authError}
+              </div>
+            )}
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-[#A67C37] mb-2 tracking-widest">Email Address</label>
+              <input 
+                type="email" 
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border-b-2 border-[#E8DFD0] py-2 focus:outline-none focus:border-[#A67C37] bg-transparent text-[#3D2B1F]"
+                placeholder="admin@blessingstrunk.com"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-[#A67C37] mb-2 tracking-widest">Password</label>
+              <input 
+                type="password" 
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border-b-2 border-[#E8DFD0] py-2 focus:outline-none focus:border-[#A67C37] bg-transparent text-[#3D2B1F]"
+                placeholder="••••••••"
+              />
+            </div>
+            <button type="submit" className="w-full bg-[#3D2B1F] text-white py-4 rounded-full hover:bg-[#A67C37] transition-all font-semibold shadow-lg">
               Login to Dashboard
             </button>
           </form>
+
+          <div className="mt-8 text-center border-t border-[#F7F3EC] pt-6">
+            <p className="text-[#8B735B] text-[10px] uppercase tracking-widest font-bold">Authorized Access Only</p>
+          </div>
         </div>
       </div>
     );
@@ -202,18 +219,17 @@ const Admin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] p-6 md:p-12 pb-32">
-      {/* Dynamic Notification Overlay */}
       {syncStatus && (
         <div className={`fixed top-24 right-6 z-[200] px-8 py-4 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-right-4 duration-300 flex items-center space-x-4 border ${
           syncStatus.type === 'success' ? 'bg-[#3D2B1F] text-[#FDFBF7] border-[#A67C37]' : 'bg-red-600 text-white border-red-800'
         }`}>
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${syncStatus.type === 'success' ? 'bg-green-500' : 'bg-white/20'}`}>
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d={syncStatus.type === 'success' ? "M5 13l4 4L19 7" : "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M5 13l4 4L19 7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-sm">{syncStatus.type === 'success' ? 'Changes Saved' : 'Alert'}</span>
+            <span className="font-bold text-sm">Action Successful</span>
             <span className="text-xs opacity-80">{syncStatus.message}</span>
           </div>
           <button onClick={() => setSyncStatus(null)} className="opacity-50 hover:opacity-100 ml-2">
@@ -226,41 +242,18 @@ const Admin: React.FC = () => {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
           <div>
             <h1 className="text-4xl serif text-[#3D2B1F]">Owner's Dashboard</h1>
-            <p className="text-[#8B735B] italic">Manage your shop content in real-time</p>
+            <p className="text-[#8B735B] italic">Welcome back, {currentUser.email}</p>
           </div>
-          <div className="flex flex-col md:flex-row items-end md:items-center space-y-4 md:space-y-0 md:space-x-4">
-            <button 
-              onClick={fetchFromCloud}
-              className="px-6 py-2 border-2 border-[#A67C37] text-[#A67C37] rounded-full text-sm font-bold hover:bg-[#A67C37] hover:text-white transition-all disabled:opacity-50"
-            >
-              Fetch Content
-            </button>
-            <button 
-              onClick={handleCloudSync}
-              disabled={isSyncing}
-              className={`bg-[#3D2B1F] text-white px-10 py-2 rounded-full text-sm font-bold hover:bg-[#A67C37] transition-all shadow-lg flex items-center space-x-2 ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isSyncing ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  <span>Publishing Changes...</span>
-                </>
-              ) : (
-                <span>Publish to Site</span>
-              )}
-            </button>
-          </div>
+          <button 
+            onClick={handleLogout}
+            className="px-8 py-2.5 bg-[#F7F3EC] text-[#3D2B1F] rounded-full text-sm font-bold border border-[#E8DFD0] hover:bg-white transition-all shadow-sm"
+          >
+            Sign Out
+          </button>
         </header>
 
-        {(isLoading || isSyncing) && (
-          <div className="bg-[#3D2B1F] text-white p-4 text-center rounded-2xl mb-8 animate-pulse font-bold flex items-center justify-center space-x-3">
-             <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-             <span>{isSyncing ? 'Writing data to cloud...' : 'Loading latest content...'}</span>
-          </div>
-        )}
-
         <div className="flex space-x-8 border-b border-[#E8DFD0] mb-12 overflow-x-auto whitespace-nowrap scrollbar-hide">
-          {['hampers', 'occasions', 'media', 'settings'].map((tab) => (
+          {['hampers', 'media', 'settings'].map((tab) => (
             <button 
               key={tab}
               onClick={() => setActiveTab(tab as any)}
@@ -304,59 +297,28 @@ const Admin: React.FC = () => {
           </div>
         )}
 
-        {/* Media Gallery Tab */}
+        {/* Media Tab */}
         {activeTab === 'media' && (
           <div className="space-y-12 animate-in fade-in duration-500">
             <div className="bg-white p-10 rounded-3xl border border-[#E8DFD0] shadow-sm flex flex-col items-center justify-center text-center space-y-6">
               <div className="w-20 h-20 bg-[#F7F3EC] rounded-full flex items-center justify-center text-[#A67C37] mb-2">
                 <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
-              <div>
-                <h3 className="text-2xl serif text-[#3D2B1F]">Site Media Assets</h3>
-                <p className="text-sm text-[#8B735B] mt-2 italic">Upload and manage photos for your hampers and site banners.</p>
-              </div>
               <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" />
               <button 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="bg-[#3D2B1F] text-white px-10 py-4 rounded-full font-semibold hover:bg-[#A67C37] shadow-lg disabled:opacity-50 flex items-center space-x-3"
+                className="bg-[#3D2B1F] text-white px-10 py-4 rounded-full font-semibold hover:bg-[#A67C37] shadow-lg disabled:opacity-50"
               >
-                {isUploading ? 'Syncing to Local...' : 'Upload New Image'}
+                {isUploading ? 'Uploading...' : 'Upload New Local Asset'}
               </button>
             </div>
-
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
               {mediaLibrary.map(item => (
-                <div key={item.id} className="group relative bg-white border border-[#E8DFD0] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all h-64">
+                <div key={item.id} className="group relative bg-white border border-[#E8DFD0] rounded-2xl overflow-hidden shadow-sm h-64">
                   <img src={item.url} className="w-full h-full object-cover" alt={item.name} />
                   <div className="absolute inset-0 bg-[#3D2B1F]/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-6 space-y-3">
-                    <button onClick={() => { navigator.clipboard.writeText(item.url); setSyncStatus({type:'success', message: 'URL copied!'}); setTimeout(()=>setSyncStatus(null), 2000); }} className="w-full bg-white text-[#3D2B1F] py-2 text-[11px] uppercase tracking-widest font-bold rounded-lg">Copy Link</button>
                     <button onClick={() => { if(confirm('Delete permanently?')) removeFromMediaLibrary(item.id); }} className="w-full bg-red-600 text-white py-2 text-[11px] uppercase tracking-widest font-bold rounded-lg">Delete</button>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-white/90 p-3 truncate text-[10px] font-bold">{item.name}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Occasions Tab */}
-        {activeTab === 'occasions' && (
-          <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl serif text-[#3D2B1F]">Manage Occasions</h2>
-              <button onClick={() => { setEditingOccasion(null); setIsOccasionModalOpen(true); }} className="bg-[#3D2B1F] text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-[#A67C37] transition-all">+ Add New Occasion</button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {occasions.map(o => (
-                <div key={o.id} className="bg-white border border-[#E8DFD0] rounded-2xl overflow-hidden p-4 flex flex-col group shadow-sm">
-                  <div className="aspect-square rounded-xl overflow-hidden mb-4 bg-[#F7F3EC]">
-                    <img src={o.image} className="w-full h-full object-cover" alt={o.title} />
-                  </div>
-                  <h3 className="font-bold text-[#3D2B1F] text-center mb-4">{o.title}</h3>
-                  <div className="flex space-x-2 mt-auto">
-                    <button onClick={() => { setEditingOccasion(o); setIsOccasionModalOpen(true); }} className="flex-grow py-2 bg-[#F7F3EC] text-[#3D2B1F] text-xs font-bold rounded-lg">Edit</button>
-                    <button onClick={() => { if(confirm('Delete this occasion?')) deleteOccasion(o.id); }} className="p-2 bg-red-50 text-red-600 rounded-lg"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg></button>
                   </div>
                 </div>
               ))}
@@ -367,7 +329,7 @@ const Admin: React.FC = () => {
         {/* Settings Tab */}
         {activeTab === 'settings' && (
           <div className="animate-in fade-in duration-500">
-            <form onSubmit={handleSettingsSubmit} className="bg-white p-10 rounded-3xl border border-[#E8DFD0] space-y-12 max-w-5xl shadow-sm">
+            <form onSubmit={handleSettingsSubmit} className="bg-white p-10 rounded-3xl border border-[#E8DFD0] space-y-12 shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div className="space-y-6">
                   <h3 className="text-sm uppercase tracking-[0.2em] text-[#A67C37] font-bold border-b border-[#F7F3EC] pb-3">Home Page Layout</h3>
@@ -377,51 +339,21 @@ const Admin: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Hero Background</label>
-                    <div className="flex gap-2">
-                      <input id="settings-heroImage" name="heroImage" defaultValue={settings.heroImage} className="flex-grow border border-[#E8DFD0] rounded-xl px-4 py-3 text-xs focus:border-[#A67C37] outline-none" />
-                      <button type="button" onClick={() => openImagePicker((url) => { const el = document.getElementById('settings-heroImage') as HTMLInputElement; if (el) el.value = url; })} className="px-4 bg-[#F7F3EC] rounded-xl hover:bg-[#E8DFD0] text-[#3D2B1F]">Browse</button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Second Section Feature Image</label>
-                    <div className="flex gap-2">
-                      <input id="settings-homeFeatureImage" name="homeFeatureImage" defaultValue={settings.homeFeatureImage} className="flex-grow border border-[#E8DFD0] rounded-xl px-4 py-3 text-xs focus:border-[#A67C37] outline-none" />
-                      <button type="button" onClick={() => openImagePicker((url) => { const el = document.getElementById('settings-homeFeatureImage') as HTMLInputElement; if (el) el.value = url; })} className="px-4 bg-[#F7F3EC] rounded-xl hover:bg-[#E8DFD0] text-[#3D2B1F]">Browse</button>
-                    </div>
+                    <input name="heroImage" defaultValue={settings.heroImage} className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-xs focus:border-[#A67C37] outline-none" />
                   </div>
                 </div>
                 <div className="space-y-6">
-                  <h3 className="text-sm uppercase tracking-[0.2em] text-[#A67C37] font-bold border-b border-[#F7F3EC] pb-3">Business Information</h3>
-                  <div><label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Owner Email (For Orders)</label><input name="ownerEmail" defaultValue={settings.ownerEmail} className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm" /></div>
+                  <h3 className="text-sm uppercase tracking-[0.2em] text-[#A67C37] font-bold border-b border-[#F7F3EC] pb-3">Contact Details</h3>
                   <div><label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">WhatsApp Number</label><input name="whatsappNumber" defaultValue={settings.whatsappNumber} className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm" /></div>
-                  <div><label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Proprietor Name</label><input name="proprietorName" defaultValue={settings.proprietorName} className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm" /></div>
-                  <div><label className="block text-xs font-bold text-[#8B735B] mb-2 uppercase">Public Phone</label><input name="phoneNumber" defaultValue={settings.phoneNumber} className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm" /></div>
                 </div>
               </div>
               <div className="flex justify-end pt-8">
-                 <button type="submit" className="bg-[#3D2B1F] text-white px-12 py-4 rounded-full font-bold shadow-xl hover:bg-[#A67C37] transition-all">Apply Locally</button>
+                 <button type="submit" className="bg-[#3D2B1F] text-white px-12 py-4 rounded-full font-bold shadow-xl hover:bg-[#A67C37] transition-all">Apply Settings</button>
               </div>
             </form>
           </div>
         )}
       </div>
-
-      {/* Shared Modals */}
-      {isImagePickerOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/70 backdrop-blur-md">
-          <div className="bg-[#FDFBF7] w-full max-w-4xl max-h-[80vh] rounded-[2rem] overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-6 bg-[#3D2B1F] text-white flex justify-between items-center"><h3 className="serif text-xl italic">Select Asset</h3><button onClick={() => setIsImagePickerOpen(false)}><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></button></div>
-            <div className="flex-grow overflow-y-auto p-8 grid grid-cols-2 md:grid-cols-4 gap-6">
-              {mediaLibrary.length === 0 && <p className="col-span-full text-center text-[#8B735B] italic py-20">No images found. Upload some in the Media Gallery tab.</p>}
-              {mediaLibrary.map(item => (
-                <button key={item.id} onClick={() => { pickerCallback(item.url); setIsImagePickerOpen(false); }} className="aspect-square rounded-2xl overflow-hidden border-2 border-transparent hover:border-[#A67C37] transition-all relative group">
-                  <img src={item.url} className="w-full h-full object-cover" alt={item.name} /><div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span className="text-white font-bold text-xs uppercase tracking-widest">Select</span></div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {isHamperModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm overflow-y-auto">
@@ -432,23 +364,9 @@ const Admin: React.FC = () => {
                 <div><label className="block text-xs font-bold text-[#8B735B] mb-2">Hamper Name</label><input name="name" defaultValue={editingHamper?.name} required className="w-full border border-[#E8DFD0] rounded-xl px-4 py-2" /></div>
                 <div><label className="block text-xs font-bold text-[#8B735B] mb-2">Starting Price</label><input name="price" defaultValue={editingHamper?.price} required className="w-full border border-[#E8DFD0] rounded-xl px-4 py-2" /></div>
                 <div><label className="block text-xs font-bold text-[#8B735B] mb-2">Category</label><select name="category" defaultValue={editingHamper?.category || 'Wooden Trunk'} className="w-full border border-[#E8DFD0] rounded-xl px-4 py-2"><option>Wooden Trunk</option><option>Festival Special</option><option>Keepsake Box</option><option>Custom Blessing</option></select></div>
-                <div className="col-span-full"><label className="block text-xs font-bold text-[#8B735B] mb-2">Image URL</label><div className="flex gap-2"><input id="hamper-image" name="image" defaultValue={editingHamper?.image} required className="flex-grow border border-[#E8DFD0] rounded-xl px-4 py-2 text-xs" /><button type="button" onClick={() => openImagePicker((url) => { const el = document.getElementById('hamper-image') as HTMLInputElement; if (el) el.value = url; })} className="px-4 bg-[#F7F3EC] rounded-xl hover:bg-[#E8DFD0] text-[#3D2B1F]">Pick</button></div></div>
+                <div className="col-span-full"><label className="block text-xs font-bold text-[#8B735B] mb-2">Image URL</label><input name="image" defaultValue={editingHamper?.image} required className="w-full border border-[#E8DFD0] rounded-xl px-4 py-2 text-xs" /></div>
               </div>
-              <div className="flex gap-6"><label className="flex items-center gap-2"><input type="checkbox" name="showOnHome" defaultChecked={editingHamper?.showOnHome ?? true} /> Home Page</label><label className="flex items-center gap-2"><input type="checkbox" name="showOnHampers" defaultChecked={editingHamper?.showOnHampers ?? true} /> Hampers Page</label><label className="flex items-center gap-2"><input type="checkbox" name="isSuggested" defaultChecked={editingHamper?.isSuggested ?? false} /> Suggested</label></div>
               <button type="submit" className="w-full bg-[#3D2B1F] text-white py-4 rounded-xl font-bold hover:bg-[#A67C37]">Confirm Hamper Details</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {isOccasionModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-3xl p-8 animate-in zoom-in-95 duration-300 shadow-2xl">
-            <div className="flex justify-between items-center mb-8"><h2 className="text-2xl serif text-[#3D2B1F]">{editingOccasion ? 'Edit Occasion' : 'New Occasion'}</h2><button onClick={() => setIsOccasionModalOpen(false)}><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></button></div>
-            <form onSubmit={saveOccasion} className="space-y-6">
-              <div><label className="block text-xs font-bold text-[#8B735B] mb-2">Title</label><input name="title" defaultValue={editingOccasion?.title} required className="w-full border border-[#E8DFD0] rounded-xl px-4 py-2" /></div>
-              <div><label className="block text-xs font-bold text-[#8B735B] mb-2">Image URL</label><div className="flex gap-2"><input id="occasion-image" name="image" defaultValue={editingOccasion?.image} required className="flex-grow border border-[#E8DFD0] rounded-xl px-4 py-2 text-xs" /><button type="button" onClick={() => openImagePicker((url) => { const el = document.getElementById('occasion-image') as HTMLInputElement; if (el) el.value = url; })} className="px-4 bg-[#F7F3EC] rounded-xl hover:bg-[#E8DFD0] text-[#3D2B1F]">Pick</button></div></div>
-              <button type="submit" className="w-full bg-[#3D2B1F] text-white py-4 rounded-xl font-bold hover:bg-[#A67C37]">Save Occasion</button>
             </form>
           </div>
         </div>
