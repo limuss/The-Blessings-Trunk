@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Hamper, SiteSettings, Occasion, MediaItem } from '../types';
+import { Hamper, SiteSettings, Occasion, MediaItem, ShopLocation } from '../types';
 
 interface StoreContextType {
   hampers: Hamper[];
@@ -89,7 +89,11 @@ const defaultSettings: SiteSettings = {
   aboutText1: 'The Blessings Trunk was founded on a simple belief: a gift is more than its contents; it is a physical manifestation of a blessing.',
   aboutText2: 'Every almond, every walnut, and every thread of saffron is sourced with reverence for the land and the hands that harvest it.',
   aboutQuote: 'We don\'t sell hampers; we facilitate blessings.',
-  gasEndpoint: 'https://script.google.com/macros/s/AKfycbzEzTXIUGapqsQeptHT-qQzlRyKP7-SLmb87J6KoSzBpgvGI5MtUaB2Ag8VvEuBiWfOVQ/exec',
+  shops: [
+    { id: 'shop-1', name: 'Srinagar Flagship', address: 'NST Complex, 1st Floor, Residency Road, Srinagar, J&K', lat: 34.0754, lng: 74.8142 },
+    { id: 'shop-2', name: 'Gulmarg Boutique', address: 'Main Market Road, Near Tourist Center, Gulmarg, J&K', lat: 34.0484, lng: 74.3805 },
+    { id: 'shop-3', name: 'Pahalgam Hub', address: 'Market Square, Pahalgam, Anantnag, J&K', lat: 34.0161, lng: 75.3250 }
+  ]
 };
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -114,10 +118,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (savedOccasions) setOccasions(JSON.parse(savedOccasions));
         else setOccasions(defaultOccasions);
 
-        if (savedSettings) setSettings(JSON.parse(savedSettings));
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          if (!parsed.shops) parsed.shops = defaultSettings.shops;
+          setSettings(parsed);
+        }
 
-        const db = await getDB();
-        const tx = db.transaction(STORE_NAME, 'readonly');
+        const dbInst = await getDB();
+        const tx = dbInst.transaction(STORE_NAME, 'readonly');
         const store = tx.objectStore(STORE_NAME);
         const request = store.getAll();
         request.onsuccess = () => setMediaLibrary(request.result);
@@ -136,61 +144,27 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addToMediaLibrary = async (item: MediaItem) => {
     setMediaLibrary(prev => [item, ...prev]);
-    const db = await getDB();
-    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const dbInst = await getDB();
+    const tx = dbInst.transaction(STORE_NAME, 'readwrite');
     tx.objectStore(STORE_NAME).put(item);
   };
 
   const removeFromMediaLibrary = async (id: string) => {
     setMediaLibrary(prev => prev.filter(m => m.id !== id));
-    const db = await getDB();
-    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const dbInst = await getDB();
+    const tx = dbInst.transaction(STORE_NAME, 'readwrite');
     tx.objectStore(STORE_NAME).delete(id);
   };
 
   const fetchFromCloud = async () => {
-    if (!settings.gasEndpoint) return;
-    setIsLoading(true);
-    try {
-      const resp = await fetch(`${settings.gasEndpoint}?action=getData`);
-      const cloudData = await resp.json();
-      if (cloudData.hampers) setHampers(cloudData.hampers);
-      if (cloudData.occasions) setOccasions(cloudData.occasions);
-      if (cloudData.settings) setSettings(cloudData.settings);
-      if (cloudData.media) {
-         setMediaLibrary(cloudData.media);
-         const db = await getDB();
-         const tx = db.transaction(STORE_NAME, 'readwrite');
-         const store = tx.objectStore(STORE_NAME);
-         store.clear();
-         cloudData.media.forEach((item: MediaItem) => store.put(item));
-      }
-    } catch (e) {
-      console.error('Cloud fetch failed:', e);
-    } finally {
-      setIsLoading(false);
-    }
+    // Firestore functionality disabled for now
+    console.log("Cloud fetch is currently disabled.");
   };
 
   const syncToCloud = async (): Promise<boolean> => {
-    if (!settings.gasEndpoint) return false;
-    try {
-      // GAS often fails CORS, but no-cors still sends the request successfully.
-      await fetch(settings.gasEndpoint, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'syncAll',
-          data: { hampers, occasions, settings, media: mediaLibrary }
-        })
-      });
-      // In no-cors, we can't read the response, so we assume success if no error is thrown
-      return true;
-    } catch (e) {
-      console.error('Sync error:', e);
-      return false;
-    }
+    // Firestore functionality disabled for now
+    console.log("Cloud sync is currently disabled.");
+    return true;
   };
 
   const updateSettings = (s: SiteSettings) => setSettings(s);
