@@ -21,32 +21,10 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
     setIsSubmitting(true);
 
     try {
-      // 1. Send Notification to Serverless Backend (GAS)
-      if (settings.gasEndpoint) {
-        // We include settings.ownerEmail so the GAS script knows where to send the email notification.
-        // Ensure your GAS script uses MailApp.sendEmail({to: e.parameter.ownerEmail, ...})
-        await fetch(settings.gasEndpoint, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'order',
-            data: {
-              product: productName || 'Custom Blessing Request',
-              email: formData.email,
-              whatsapp: formData.whatsapp,
-              ownerEmail: settings.ownerEmail, // Crucial for automated emails
-              timestamp: new Date().toISOString()
-            }
-          })
-        });
-      }
-
-      // 2. Open WhatsApp for the User
+      // Direct WhatsApp communication
       const message = `✨ *New Inquiry from Website* ✨\n\n🎁 *Product:* ${productName || 'Custom Request'}\n📧 *Email:* ${formData.email}\n📱 *WhatsApp:* ${formData.whatsapp}\n\n_Sent from The Blessings Trunk_`;
       const encodedMsg = encodeURIComponent(message);
       
-      // Auto-open WhatsApp chat with the owner
       window.open(`https://wa.me/${settings.whatsappNumber}?text=${encodedMsg}`, '_blank');
       
       setIsSuccess(true);
@@ -54,10 +32,9 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
         setIsSuccess(false);
         onClose();
         setFormData({ email: '', whatsapp: '' });
-      }, 4000);
+      }, 5000);
     } catch (error) {
-      console.error('Submission error:', error);
-      // Fallback redirect if fetch completely fails
+      console.error("Order error", error);
       window.open(`https://wa.me/${settings.whatsappNumber}`, '_blank');
       onClose();
     } finally {
@@ -95,9 +72,9 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
                 <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
               <div>
-                <h3 className="text-2xl serif text-[#3D2B1F] mb-2">Request Submitted</h3>
-                <p className="text-sm text-[#8B735B] leading-relaxed">
-                  We've recorded your inquiry and opened WhatsApp for you to connect directly with us.
+                <h3 className="text-2xl serif text-[#3D2B1F] mb-2">Connecting...</h3>
+                <p className="text-sm text-[#8B735B] leading-relaxed mb-4">
+                  We've opened WhatsApp for your direct inquiry. Our agent will be with you shortly.
                 </p>
               </div>
             </div>
@@ -119,7 +96,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
                     value={formData.email}
                     onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     className="w-full border-b border-[#E8DFD0] py-3 focus:outline-none focus:border-[#A67C37] transition-all bg-transparent text-[#3D2B1F] placeholder:text-[#D9C8B8]"
-                    placeholder="Where should we send details?"
+                    placeholder="Enter your email address"
                   />
                 </div>
 
@@ -131,7 +108,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
                     value={formData.whatsapp}
                     onChange={e => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))}
                     className="w-full border-b border-[#E8DFD0] py-3 focus:outline-none focus:border-[#A67C37] transition-all bg-transparent text-[#3D2B1F] placeholder:text-[#D9C8B8]"
-                    placeholder="+91 00000 00000"
+                    placeholder="e.g. +91 88990 43549"
                   />
                 </div>
               </div>
@@ -143,13 +120,10 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
                   className="w-full bg-[#3D2B1F] text-white py-5 rounded-full font-bold hover:bg-[#A67C37] transition-all shadow-xl flex items-center justify-center space-x-3 disabled:opacity-50 group"
                 >
                   {isSubmitting ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                      <span>Submitting...</span>
-                    </>
+                    <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                   ) : (
                     <>
-                      <span>Inquire Now</span>
+                      <span>Send Inquiry</span>
                       <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </>
                   )}
