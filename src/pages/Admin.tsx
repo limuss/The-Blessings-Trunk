@@ -106,5 +106,6 @@ const Admin: React.FC = () => {
     editingHamper ? updateHamper(h) : addHamper(h);
     setIsHamperModalOpen(false);
     setEditingHamper(null);
-    setSyncStatus({ type: 'success', message: 'Hamper saved' });
-    setTimeout(() => setSy
+  setSyncStatus({ type: 'success', message: 'Hamper saved' });
+setTimeout(() => setSyncStatus(null), 3000);
+
