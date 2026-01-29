@@ -1,8 +1,5 @@
 {
-  "name": "Copy of The Blessings Trunk",
+  "name": "The Blessings Trunk",
   "description": "A premium dry fruit hamper boutique handcrafted in Jammu & Kashmir, offering elegantly curated gifts for every occasion.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone"
-  ]
+  "requestFramePermissions": []
 }

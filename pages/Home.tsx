@@ -1,55 +1,12 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import OrderModal from '../components/OrderModal';
 
 const Home: React.FC = () => {
   const { hampers, occasions, settings } = useStore();
   const [modalState, setModalState] = useState<{ open: boolean; product?: string }>({ open: false });
-  const [nearestShop, setNearestShop] = useState<{ name: string; distance: number } | null>(null);
-  const [showLocationToast, setShowLocationToast] = useState(false);
   
   const homeHampers = hampers.filter(h => h.showOnHome);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const { latitude, longitude } = position.coords;
-        
-        let minDistance = Infinity;
-        let closest = null;
-
-        settings.shops.forEach(shop => {
-          const d = calculateDistance(latitude, longitude, shop.lat, shop.lng);
-          if (d < minDistance) {
-            minDistance = d;
-            closest = shop;
-          }
-        });
-
-        if (closest) {
-          setNearestShop({ name: (closest as any).name, distance: Math.round(minDistance * 10) / 10 });
-          setShowLocationToast(true);
-          // Auto-dismiss toast after 8 seconds
-          setTimeout(() => setShowLocationToast(false), 8000);
-        }
-      });
-    }
-  }, [settings.shops]);
-
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371; // Radius of the earth in km
-    const dLat = deg2rad(lat2 - lat1);
-    const dLon = deg2rad(lon2 - lon1);
-    const a = 
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-      Math.sin(dLon / 2) * Math.sin(dLon / 2); 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
-    return R * c; // Distance in km
-  };
-
-  const deg2rad = (deg: number) => deg * (Math.PI / 180);
 
   return (
     <div className="bg-[#FDFBF7] relative">
@@ -58,24 +15,6 @@ const Home: React.FC = () => {
         onClose={() => setModalState({ open: false })} 
         productName={modalState.product} 
       />
-
-      {/* Location Proximity Toast */}
-      {showLocationToast && nearestShop && (
-        <div className="fixed top-24 right-6 z-[60] bg-[#3D2B1F] text-[#FDFBF7] p-5 rounded-2xl shadow-2xl border border-[#A67C37] animate-in slide-in-from-right-10 duration-500 max-w-xs">
-          <button onClick={() => setShowLocationToast(false)} className="absolute top-2 right-2 text-white/40 hover:text-white">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </button>
-          <div className="flex items-center space-x-4">
-            <div className="bg-[#A67C37] p-2 rounded-full">
-               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-[#A67C37] mb-1">Nearby Boutique</p>
-              <p className="text-sm serif italic">You are just <span className="text-[#A67C37] font-bold">{nearestShop.distance} km</span> from our {nearestShop.name} shop!</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Hero Section */}
       <section 
