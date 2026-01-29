@@ -26,6 +26,14 @@ export interface MediaItem {
   uploadedAt: string;
 }
 
+export interface ShopLocation {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+}
+
 export interface SiteSettings {
   phoneNumber: string;
   whatsappNumber: string;
@@ -37,12 +45,13 @@ export interface SiteSettings {
   heroTitle: string;
   heroSubtitle: string;
   heroImage: string;
-  homeFeatureImage: string; // New field
+  homeFeatureImage: string;
   aboutTitle: string;
   aboutText1: string;
   aboutText2: string;
   aboutQuote: string;
-  gasEndpoint?: string; // Google Apps Script URL
+  gasEndpoint?: string;
+  shops: ShopLocation[];
 }
 
 export interface Message {

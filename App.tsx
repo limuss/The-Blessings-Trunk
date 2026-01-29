@@ -12,10 +12,6 @@ import Admin from './pages/Admin';
 import ChatBot from './components/ChatBot';
 import { StoreProvider } from './context/StoreContext';
 
-const GAS_ENDPOINT =
-  "https://script.google.com/macros/s/AKfycbzEzTXIUGapqsQeptHT-qQzlRyKP7-SLmb87J6KoSzBpgvGI5MtUaB2Ag8VvEuBiWfOVQ/exec";
-
-
 const App: React.FC = () => {
   return (
     <StoreProvider>
@@ -32,31 +28,6 @@ const App: React.FC = () => {
               <Route path="/occasions" element={<Home />} />
             </Routes>
           </main>
-          <button
-  style={{
-    padding: "12px 20px",
-    background: "#4A3728",
-    color: "white",
-    margin: "20px",
-    borderRadius: "6px"
-  }}
-  onClick={async () => {
-    await fetch(GAS_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "order",
-        email: "frontend-test@example.com",
-        phone: "+91 88888 88888"
-      })
-    });
-
-    alert("Request sent from frontend");
-  }}
->
-  TEST EMAIL FROM FRONTEND
-</button>
-
           <Footer />
           <ChatBot />
         </div>

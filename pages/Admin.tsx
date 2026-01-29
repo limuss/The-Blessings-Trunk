@@ -13,6 +13,7 @@ const Admin: React.FC = () => {
   
   const [currentUser, setCurrentUser] = useState<firebase.User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
@@ -27,7 +28,6 @@ const Admin: React.FC = () => {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      // Admin status is managed via Firebase console/authentication settings.
       setCurrentUser(user);
       setIsAuthLoading(false);
     });
@@ -39,7 +39,11 @@ const Admin: React.FC = () => {
     setAuthError('');
 
     try {
-      await auth.signInWithEmailAndPassword(email, password);
+      if (isSignUp) {
+        await auth.createUserWithEmailAndPassword(email, password);
+      } else {
+        await auth.signInWithEmailAndPassword(email, password);
+      }
     } catch (error: any) {
       console.error("Auth error:", error);
       if (error.code === 'auth/unauthorized-domain') {
@@ -155,7 +159,7 @@ const Admin: React.FC = () => {
         <div className="bg-white p-10 rounded-3xl shadow-2xl border border-[#E8DFD0] w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl serif text-[#3D2B1F] font-bold">Admin Portal</h1>
-            <p className="text-[#8B735B] text-sm mt-2">Sign in to your dashboard</p>
+            <p className="text-[#8B735B] text-sm mt-2">{isSignUp ? 'Create an admin account' : 'Sign in to your dashboard'}</p>
           </div>
           
           <form onSubmit={handleAuth} className="space-y-6">
@@ -187,12 +191,18 @@ const Admin: React.FC = () => {
               />
             </div>
             <button type="submit" className="w-full bg-[#3D2B1F] text-white py-4 rounded-full hover:bg-[#A67C37] transition-all font-semibold shadow-lg">
-              Login to Dashboard
+              {isSignUp ? 'Sign Up' : 'Login to Dashboard'}
             </button>
           </form>
 
           <div className="mt-8 text-center border-t border-[#F7F3EC] pt-6">
-            <p className="text-[#8B735B] text-[10px] uppercase tracking-widest font-bold">Authorized Access Only</p>
+            <button 
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-[#8B735B] text-xs font-medium hover:text-[#3D2B1F] transition-colors"
+            >
+              {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
+            </button>
+            <p className="text-[#8B735B] text-[10px] uppercase tracking-widest font-bold mt-4">Authorized Access Only</p>
           </div>
         </div>
       </div>
