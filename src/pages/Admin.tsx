@@ -13,7 +13,6 @@ const Admin: React.FC = () => {
   
   const [currentUser, setCurrentUser] = useState<firebase.User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
@@ -39,17 +38,20 @@ const Admin: React.FC = () => {
     setAuthError('');
 
     try {
-      if (isSignUp) {
-        await auth.createUserWithEmailAndPassword(email, password);
-      } else {
-        await auth.signInWithEmailAndPassword(email, password);
-      }
+      await auth.signInWithEmailAndPassword(email, password);
     } catch (error: any) {
       console.error("Auth error:", error);
+      // Map Firebase errors to user-friendly messages
       if (error.code === 'auth/unauthorized-domain') {
         setAuthError('This domain is not authorized in your Firebase Project.');
-      } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+      } else if (
+        error.code === 'auth/invalid-credential' || 
+        error.code === 'auth/wrong-password' || 
+        error.code === 'auth/user-not-found'
+      ) {
         setAuthError('Email or password is incorrect');
+      } else if (error.code === 'auth/invalid-email') {
+        setAuthError('Please enter a valid email address');
       } else {
         setAuthError(error.message);
       }
@@ -159,7 +161,7 @@ const Admin: React.FC = () => {
         <div className="bg-white p-10 rounded-3xl shadow-2xl border border-[#E8DFD0] w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl serif text-[#3D2B1F] font-bold">Admin Portal</h1>
-            <p className="text-[#8B735B] text-sm mt-2">{isSignUp ? 'Create an admin account' : 'Sign in to your dashboard'}</p>
+            <p className="text-[#8B735B] text-sm mt-2">Sign in to your dashboard</p>
           </div>
           
           <form onSubmit={handleAuth} className="space-y-6">
@@ -191,18 +193,12 @@ const Admin: React.FC = () => {
               />
             </div>
             <button type="submit" className="w-full bg-[#3D2B1F] text-white py-4 rounded-full hover:bg-[#A67C37] transition-all font-semibold shadow-lg">
-              {isSignUp ? 'Sign Up' : 'Login to Dashboard'}
+              Login to Dashboard
             </button>
           </form>
 
           <div className="mt-8 text-center border-t border-[#F7F3EC] pt-6">
-            <button 
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-[#8B735B] text-xs font-medium hover:text-[#3D2B1F] transition-colors"
-            >
-              {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
-            </button>
-            <p className="text-[#8B735B] text-[10px] uppercase tracking-widest font-bold mt-4">Authorized Access Only</p>
+            <p className="text-[#8B735B] text-[10px] uppercase tracking-widest font-bold">Authorized Access Only</p>
           </div>
         </div>
       </div>
