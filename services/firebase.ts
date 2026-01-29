@@ -1,20 +1,16 @@
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// New Firebase configuration for The Blessings Trunk
 const firebaseConfig = {
-  apiKey: "AIzaSyDDeWgHJ3HF0gKJ8mS6z_nl8vMuQtG48aI",
-  authDomain: "the-blessings-trunk.firebaseapp.com",
-  projectId: "the-blessings-trunk",
-  storageBucket: "the-blessings-trunk.firebasestorage.app",
-  messagingSenderId: "695595089738",
-  appId: "1:695595089738:web:060d3e09476ee1e65ecbb3",
-  measurementId: "G-LMESVPBF6M"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase using compat mode
-const app = firebase.initializeApp(firebaseConfig);
-export const auth = firebase.auth();
-export const googleProvider = new firebase.auth.GoogleAuthProvider();
+const app = initializeApp(firebaseConfig);
 
-export default firebase;
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
