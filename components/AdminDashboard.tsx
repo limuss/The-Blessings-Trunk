@@ -1,8 +1,9 @@
+
 import React, { useState, useRef } from 'react';
-import { signOut } from 'firebase/auth';
 import { useStore } from '../context/StoreContext';
-import { Hamper, SiteSettings, MediaItem, Occasion } from '../types';
+import { Hamper, SiteSettings, MediaItem, ShopLocation, Occasion } from '../types';
 import { auth } from '../services/firebase';
+import { signOut } from 'firebase/auth';
 
 const AdminDashboard: React.FC = () => {
   const { 
