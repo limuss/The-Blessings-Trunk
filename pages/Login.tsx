@@ -2,11 +2,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { auth } from '../services/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 const Login: React.FC = () => {
-  const { currentUser, loginWithGoogle, isLoading } = useAuth();
+  const { currentUser, loginWithGoogle, login, signup, isLoading } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,9 +18,9 @@ const Login: React.FC = () => {
     setError('');
     try {
       if (isRegister) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        await signup(email, password);
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        await login(email, password);
       }
     } catch (err: any) {
       setError(err.message);
@@ -35,10 +33,10 @@ const Login: React.FC = () => {
         <h2 className="text-3xl serif text-[#3D2B1F] text-center mb-8">
           {isRegister ? 'Join the Trunk' : 'Welcome Back'}
         </h2>
-        
+
         {error && <div className="mb-4 text-xs text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">{error}</div>}
 
-        <button 
+        <button
           onClick={loginWithGoogle}
           className="w-full border border-[#E8DFD0] py-3 rounded-full flex items-center justify-center space-x-3 hover:bg-[#F7F3EC] transition-all mb-6"
         >
@@ -53,17 +51,17 @@ const Login: React.FC = () => {
         </div>
 
         <form onSubmit={handleEmailAuth} className="space-y-4">
-          <input 
-            type="email" 
-            placeholder="Email Address" 
-            className="w-full border p-3 rounded-xl text-sm" 
+          <input
+            type="email"
+            placeholder="Email Address"
+            className="w-full border p-3 rounded-xl text-sm"
             value={email}
             onChange={e => setEmail(e.target.value)}
           />
-          <input 
-            type="password" 
-            placeholder="Password" 
-            className="w-full border p-3 rounded-xl text-sm" 
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full border p-3 rounded-xl text-sm"
             value={password}
             onChange={e => setPassword(e.target.value)}
           />

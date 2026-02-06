@@ -22,11 +22,11 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
 
     try {
       // Direct WhatsApp communication
-      const message = `✨ *New Inquiry from Website* ✨\n\n🎁 *Product:* ${productName || 'Custom Request'}\n📧 *Email:* ${formData.email}\n📱 *WhatsApp:* ${formData.whatsapp}\n\n_Sent from The Blessings Trunk_`;
+      const message = `🎁 *Product:* ${productName || 'Custom Request'}\n📧 *Email:* ${formData.email}\n📱 *WhatsApp:* ${formData.whatsapp}\n\n_Sent from The Blessings Trunk_`;
       const encodedMsg = encodeURIComponent(message);
-      
+
       window.open(`https://wa.me/${settings.whatsappNumber}?text=${encodedMsg}`, '_blank');
-      
+
       setIsSuccess(true);
       setTimeout(() => {
         setIsSuccess(false);
@@ -54,7 +54,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
               <rect width="100%" height="100%" fill="url(#modal-pattern)" />
             </svg>
           </div>
-          
+
           <div className="text-center relative z-10 px-6">
             <h2 className="text-3xl md:text-4xl serif text-[#FDFBF7] italic mb-1">Blessing Inquiry</h2>
             <p className="text-[10px] uppercase tracking-[0.4em] text-[#A67C37] font-bold">The Blessings Trunk</p>
@@ -86,12 +86,12 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
                   {productName || 'Handcrafted Trunk Curation'}
                 </p>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="group">
                   <label className="block text-[10px] uppercase tracking-widest text-[#A67C37] font-bold mb-2 group-focus-within:text-[#3D2B1F] transition-colors">Your Email</label>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     required
                     value={formData.email}
                     onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
@@ -102,8 +102,8 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
 
                 <div className="group">
                   <label className="block text-[10px] uppercase tracking-widest text-[#A67C37] font-bold mb-2 group-focus-within:text-[#3D2B1F] transition-colors">WhatsApp Number</label>
-                  <input 
-                    type="tel" 
+                  <input
+                    type="tel"
                     required
                     value={formData.whatsapp}
                     onChange={e => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))}
@@ -114,8 +114,8 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
               </div>
 
               <div className="pt-4">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isSubmitting}
                   className="w-full bg-[#3D2B1F] text-white py-5 rounded-full font-bold hover:bg-[#A67C37] transition-all shadow-xl flex items-center justify-center space-x-3 disabled:opacity-50 group"
                 >

@@ -24,10 +24,10 @@ const Hampers: React.FC = () => {
 
   return (
     <div className="bg-[#FDFBF7]">
-      <OrderModal 
-        isOpen={modalState.open} 
-        onClose={() => setModalState({ open: false })} 
-        productName={modalState.product} 
+      <OrderModal
+        isOpen={modalState.open}
+        onClose={() => setModalState({ open: false })}
+        productName={modalState.product}
       />
 
       <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto text-center">
@@ -45,7 +45,7 @@ const Hampers: React.FC = () => {
                   <div key={h.id} className="bg-white p-4 rounded-xl shadow-sm hover:shadow-xl transition-all group flex flex-col">
                     <div className="aspect-square overflow-hidden rounded-lg mb-6 relative">
                       <img src={h.image} alt={h.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                      <button 
+                      <button
                         onClick={() => handleAction(h.id, 'wishlist')}
                         className={`absolute top-2 right-2 p-2 rounded-full shadow-md transition-colors ${wishlist.includes(h.id) ? 'bg-[#A67C37] text-white' : 'bg-white/80 text-[#3D2B1F]'}`}
                       >
@@ -54,15 +54,15 @@ const Hampers: React.FC = () => {
                     </div>
                     <h4 className="text-lg serif text-[#3D2B1F] mb-1">{h.name}</h4>
                     <p className="text-[#A67C37] font-bold mb-4">₹ {h.price}</p>
-                    
+
                     <div className="grid grid-cols-2 gap-2 mt-auto">
-                      <button 
-                        onClick={() => handleAction(h.id, 'cart')}
-                        className={`py-2 text-[10px] font-bold uppercase rounded-lg border transition-all ${cart.includes(h.id) ? 'bg-[#3D2B1F] text-white border-[#3D2B1F]' : 'border-[#E8DFD0] text-[#3D2B1F] hover:bg-[#FDFBF7]'}`}
+                      <button
+                        onClick={() => setModalState({ open: true, product: h.name })}
+                        className="py-2 text-[10px] font-bold uppercase rounded-lg border border-[#E8DFD0] text-[#3D2B1F] hover:bg-[#FDFBF7] transition-all"
                       >
-                        {cart.includes(h.id) ? 'In Cart' : 'Add to Cart'}
+                        Add to Cart
                       </button>
-                      <button 
+                      <button
                         onClick={() => setModalState({ open: true, product: h.name })}
                         className="py-2 text-[10px] font-bold uppercase rounded-lg bg-[#A67C37] text-white hover:bg-[#8B672E]"
                       >

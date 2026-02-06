@@ -1,13 +1,15 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, googleProvider } from '../services/firebase';
-import { onAuthStateChanged, getIdTokenResult, signInWithPopup, signOut, User } from 'firebase/auth';
+import { onAuthStateChanged, getIdTokenResult, signInWithPopup, signOut, User, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 interface AuthContextType {
   currentUser: User | null;
   isAdmin: boolean;
   isLoading: boolean;
   loginWithGoogle: () => Promise<void>;
+  signup: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -28,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Verify Custom Claims for security
           const token = await getIdTokenResult(user);
           const hasAdminClaim = !!token.claims.admin;
-          
+
           // Final fallback: Check specific admin email
           setIsAdmin(hasAdminClaim || user.email === ADMIN_EMAIL);
         } catch (error) {
@@ -52,12 +54,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signup = async (email: string, password: string) => {
+    await createUserWithEmailAndPassword(auth, email, password);
+  };
+
+  const login = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password);
+  };
+
   const logout = async () => {
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, isAdmin, isLoading, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ currentUser, isAdmin, isLoading, loginWithGoogle, signup, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
