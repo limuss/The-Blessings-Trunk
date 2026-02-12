@@ -4,6 +4,7 @@ import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
 import OrderModal from '../components/OrderModal';
 import { useNavigate } from 'react-router-dom';
+import ImageSequencePlayer from '../components/ImageSequencePlayer';
 
 const Hampers: React.FC = () => {
   const { hampers, toggleCart, toggleWishlist, cart, wishlist } = useStore();
@@ -44,7 +45,49 @@ const Hampers: React.FC = () => {
                 {hampers.filter(h => h.category === cat && h.showOnHampers).map((h) => (
                   <div key={h.id} className="bg-white p-4 rounded-xl shadow-sm hover:shadow-xl transition-all group flex flex-col">
                     <div className="aspect-square overflow-hidden rounded-lg mb-6 relative">
-                      <img src={h.image} alt={h.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      {h.name === 'California Almonds' ? (
+                        <ImageSequencePlayer
+                          basePath="/almond-sequence/ezgif-frame-"
+                          frameCount={258}
+                          extension=".jpg"
+                          className="w-full h-full"
+                          fps={30}
+                        />
+                      ) : h.name === 'Goa Cashews' ? (
+                        <ImageSequencePlayer
+                          basePath="/cashew-sequence/ezgif-frame-"
+                          frameCount={260}
+                          extension=".jpg"
+                          className="w-full h-full"
+                          fps={30}
+                        />
+                      ) : h.name === 'Ajwa Dates' ? (
+                        <ImageSequencePlayer
+                          basePath="/ajwa-dates-sequence/ezgif-frame-"
+                          frameCount={124}
+                          extension=".jpg"
+                          className="w-full h-full"
+                          fps={30}
+                        />
+                      ) : h.name === 'Kalmi Dates' ? (
+                        <ImageSequencePlayer
+                          basePath="/kalmi-dates-sequence/ezgif-frame-"
+                          frameCount={280}
+                          extension=".jpg"
+                          className="w-full h-full"
+                          fps={30}
+                        />
+                      ) : h.name === 'Saffron (Kesari)' ? (
+                        <ImageSequencePlayer
+                          basePath="/saffron-sequence/ezgif-frame-"
+                          frameCount={92}
+                          extension=".jpg"
+                          className="w-full h-full"
+                          fps={30}
+                        />
+                      ) : (
+                        <img src={h.image} alt={h.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      )}
                       <button
                         onClick={() => handleAction(h.id, 'wishlist')}
                         className={`absolute top-2 right-2 p-2 rounded-full shadow-md transition-colors ${wishlist.includes(h.id) ? 'bg-[#A67C37] text-white' : 'bg-white/80 text-[#3D2B1F]'}`}

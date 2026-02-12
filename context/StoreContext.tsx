@@ -37,8 +37,8 @@ const defaultSettings: SiteSettings = {
   twitterUrl: '#',
   heroTitle: 'The Blessings Trunk',
   heroSubtitle: 'A trunk full of love, warmth & heartfelt wishes',
-  heroImage: 'https://images.unsplash.com/photo-1606830733744-0ad778449672?q=80&w=2000&auto=format&fit=crop',
-  homeFeatureImage: 'https://images.unsplash.com/photo-1516054575922-f0b8eeadec1a?q=80&w=1374&auto=format&fit=crop',
+  heroImage: 'https://i.pinimg.com/736x/71/ae/65/71ae65fb2265bfdde8e423a87be501df.jpg',
+  homeFeatureImage: 'https://i.pinimg.com/736x/47/01/77/470177b9b31fe2b0f2a4b12dc7912f6d.jpg',
   aboutTitle: 'Gifting with Emotion',
   aboutText1: 'The Blessings Trunk facilitates blessings through premium handcrafted Kashmiri dry fruit hampers.',
   aboutText2: 'Every thread of saffron is sourced with reverence for our heritage.',
@@ -52,32 +52,32 @@ const defaultOccasions: Occasion[] = [
   {
     id: 'occ-1',
     title: 'Nikkah & Weddings',
-    image: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=1470&auto=format&fit=crop'
+    image: 'https://i.pinimg.com/736x/58/ea/f8/58eaf86647247159eade109d171882a0.jpg'
   },
   {
     id: 'occ-2',
     title: 'Eid Celebrations',
-    image: 'https://images.unsplash.com/photo-1583324622756-34509d6c4217?q=80&w=1374&auto=format&fit=crop'
+    image: 'https://i.pinimg.com/1200x/7c/1f/e5/7c1fe57da9748fa573e65a722946921c.jpg'
   },
   {
     id: 'occ-3',
     title: 'Corporate Gifting',
-    image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=1440&auto=format&fit=crop'
+    image: 'https://i.pinimg.com/736x/38/01/e0/3801e0205dc217c2f56452b76ab47f73.jpg'
   },
   {
     id: 'occ-4',
     title: 'Baby Announcement',
-    image: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=1470&auto=format&fit=crop'
+    image: 'https://i.pinimg.com/736x/b6/c0/80/b6c080db18f09fb72f2fcb219d58a2b7.jpg'
   },
   {
     id: 'occ-5',
     title: 'House Warming',
-    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1470&auto=format&fit=crop'
+    image: 'https://i.pinimg.com/1200x/01/89/b8/0189b8f4a8e44005cc920da579acb90a.jpg'
   },
   {
     id: 'occ-6',
     title: 'Personal Gestures',
-    image: 'https://images.unsplash.com/photo-1513201099705-a9746e1e201f?q=80&w=1374&auto=format&fit=crop'
+    image: 'https://i.pinimg.com/736x/52/2b/4e/522b4ed410f5881da1ecd7e69e8e278d.jpg'
   }
 ];
 
@@ -87,7 +87,7 @@ const defaultHampers: Hamper[] = [
     name: 'Royal Saffron Trunk',
     description: 'A luxurious collection of premium Kashmiri Saffron, Mamra Almonds, and Snow-White Walnuts encased in a handcrafted walnut wood trunk. Perfect for weddings and grand gestures.',
     price: '3500',
-    image: 'https://images.unsplash.com/photo-1595166687023-34538947ddc8?q=80&w=1471&auto=format&fit=crop',
+    image: 'https://i.pinimg.com/736x/3c/6f/f9/3c6ff99812348abb108cb9a93d2c9f66.jpg',
     category: 'Wedding',
     showOnHome: true,
     showOnHampers: true,
@@ -98,7 +98,7 @@ const defaultHampers: Hamper[] = [
     name: 'Valley\'s Embrace',
     description: 'An assortment of sun-dried Apricots, Figs, and organic Kashmiri Honey. A sweet and healthy gesture for house warmings and personal gifts.',
     price: '1800',
-    image: 'https://images.unsplash.com/photo-1605666118742-5f65a6f2316e?q=80&w=1510&auto=format&fit=crop',
+    image: 'https://i.pinimg.com/736x/d5/08/98/d50898655c58f234e38bfdd284f86184.jpg',
     category: 'Gifting',
     showOnHome: true,
     showOnHampers: true,
@@ -109,7 +109,7 @@ const defaultHampers: Hamper[] = [
     name: 'Shikara Delight',
     description: 'A festive mix of Dates, Cashews, and our signature Kahwa spice mix. The perfect companion for Eid celebrations and family gatherings.',
     price: '2200',
-    image: 'https://images.unsplash.com/photo-1606830733744-0ad778449672?q=80&w=2000&auto=format&fit=crop',
+    image: 'https://i.pinimg.com/736x/8b/c5/89/8bc589b14ca4495dc3e800b718828211.jpg',
     category: 'Festive',
     showOnHome: true,
     showOnHampers: true,
@@ -175,7 +175,7 @@ const defaultHampers: Hamper[] = [
     name: 'Kimia Raisins',
     description: 'Large, juicy green raisins—sweet and plump for desserts or trail mix. 250g pack.',
     price: '300',
-    image: 'https://images.unsplash.com/photo-1605666118742-5f65a6f2316e?q=80&w=1510&auto=format&fit=crop',
+    image: '/images/raisins.jpg',
     category: 'Dry Fruits',
     showOnHome: false,
     showOnHampers: true,
@@ -186,7 +186,7 @@ const defaultHampers: Hamper[] = [
     name: 'Walnuts',
     description: 'Kashmir-sourced, brain-shaped nuts. Loaded with omega-3s for heart health. 250g pack.',
     price: '500',
-    image: 'https://images.unsplash.com/photo-1595166687023-34538947ddc8?q=80&w=1471&auto=format&fit=crop',
+    image: '/images/walnuts.jpg',
     category: 'Dry Fruits',
     showOnHome: false,
     showOnHampers: true,
@@ -208,7 +208,7 @@ const defaultHampers: Hamper[] = [
     name: 'Anjeer (Figs)',
     description: 'Dried, soft figs—fiber-rich for digestion and natural sweetness. 250g pack.',
     price: '350',
-    image: 'https://images.unsplash.com/photo-1605666118742-5f65a6f2316e?q=80&w=1510&auto=format&fit=crop',
+    image: '/images/anjeer.jpg',
     category: 'Dry Fruits',
     showOnHome: false,
     showOnHampers: true,
@@ -219,7 +219,7 @@ const defaultHampers: Hamper[] = [
     name: 'Royal Diwali Delight',
     description: 'Almonds, cashews, Ajwa dates, raisins, walnuts. For prosperity & joy. (Save 15%)',
     price: '1200',
-    image: 'https://images.unsplash.com/photo-1599707367072-cd6ad66aa1a8?q=80&w=1470&auto=format&fit=crop',
+    image: 'https://i.pinimg.com/736x/9f/f2/3b/9ff23b390fc813da5c5a9e6191acdc33.jpg',
     category: 'Festive',
     showOnHome: true,
     showOnHampers: true,
@@ -230,7 +230,7 @@ const defaultHampers: Hamper[] = [
     name: 'Eid Special',
     description: 'Ajwa & Kalmi dates, saffron, anjeer, kimia raisins. Blessed festivities! (Save 20%)',
     price: '1500',
-    image: 'https://images.unsplash.com/photo-1616429598822-4a005086e118?q=80&w=1374&auto=format&fit=crop',
+    image: '/images/eid_special.jpg',
     category: 'Festive',
     showOnHome: true,
     showOnHampers: true,
@@ -241,7 +241,7 @@ const defaultHampers: Hamper[] = [
     name: 'Wellness Booster',
     description: 'Almonds, walnuts, figs, raisins. For daily health & fitness routines.',
     price: '900',
-    image: 'https://images.unsplash.com/photo-1511520626385-d60232470659?q=80&w=1632&auto=format&fit=crop',
+    image: '/images/wellness_booster.png',
     category: 'Gifting',
     showOnHome: false,
     showOnHampers: true,
@@ -263,7 +263,7 @@ const defaultHampers: Hamper[] = [
     name: 'Custom Hamper',
     description: 'Mix your favorites (min. 500g). Starting at ₹800.',
     price: '800',
-    image: 'https://images.unsplash.com/photo-1592985652516-081cfd33d74c?q=80&w=1470&auto=format&fit=crop',
+    image: '/images/custom_hamper.png',
     category: 'Gifting',
     showOnHome: false,
     showOnHampers: true,
@@ -289,9 +289,55 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const savedOccasions = localStorage.getItem('bt_occasions_v2');
     const savedSettings = localStorage.getItem('bt_settings_v1');
 
-    if (savedHampers) setHampers(JSON.parse(savedHampers));
-    if (savedOccasions) setOccasions(JSON.parse(savedOccasions));
-    if (savedSettings) setSettings(JSON.parse(savedSettings));
+    if (savedHampers) {
+      const parsed = JSON.parse(savedHampers);
+      // Migration for Royal Saffron Trunk image
+      const saffronTrunk = parsed.find((h: any) => h.id === 'hamp-1');
+      if (saffronTrunk && !saffronTrunk.image.includes('pinimg.com')) {
+        saffronTrunk.image = 'https://i.pinimg.com/736x/3c/6f/f9/3c6ff99812348abb108cb9a93d2c9f66.jpg';
+      }
+      const valleyEmbrace = parsed.find((h: any) => h.id === 'hamp-2');
+      if (valleyEmbrace && !valleyEmbrace.image.includes('pinimg.com')) {
+        valleyEmbrace.image = 'https://i.pinimg.com/736x/d5/08/98/d50898655c58f234e38bfdd284f86184.jpg';
+      }
+      const diwaliDelight = parsed.find((h: any) => h.id === 'hamp-13');
+      if (diwaliDelight && !diwaliDelight.image.includes('pinimg.com')) {
+        diwaliDelight.image = 'https://i.pinimg.com/736x/9f/f2/3b/9ff23b390fc813da5c5a9e6191acdc33.jpg';
+      }
+      const shikaraDelight = parsed.find((h: any) => h.id === 'hamp-3');
+      if (shikaraDelight && !shikaraDelight.image.includes('pinimg.com')) {
+        shikaraDelight.image = 'https://i.pinimg.com/736x/8b/c5/89/8bc589b14ca4495dc3e800b718828211.jpg';
+      }
+      setHampers(parsed);
+    }
+    if (savedOccasions) {
+      const parsed = JSON.parse(savedOccasions);
+      // Migration for new Pinterest occasion images
+      const updateOcc = (id: string, newUrl: string) => {
+        const item = parsed.find((o: any) => o.id === id);
+        if (item && !item.image.includes('pinimg.com')) {
+          item.image = newUrl;
+        }
+      };
+      updateOcc('occ-1', 'https://i.pinimg.com/736x/58/ea/f8/58eaf86647247159eade109d171882a0.jpg');
+      updateOcc('occ-2', 'https://i.pinimg.com/1200x/7c/1f/e5/7c1fe57da9748fa573e65a722946921c.jpg');
+      updateOcc('occ-3', 'https://i.pinimg.com/736x/38/01/e0/3801e0205dc217c2f56452b76ab47f73.jpg');
+      updateOcc('occ-4', 'https://i.pinimg.com/736x/b6/c0/80/b6c080db18f09fb72f2fcb219d58a2b7.jpg');
+      updateOcc('occ-5', 'https://i.pinimg.com/1200x/01/89/b8/0189b8f4a8e44005cc920da579acb90a.jpg');
+      updateOcc('occ-6', 'https://i.pinimg.com/736x/52/2b/4e/522b4ed410f5881da1ecd7e69e8e278d.jpg');
+      setOccasions(parsed);
+    }
+    if (savedSettings) {
+      const parsed = JSON.parse(savedSettings);
+      // Migration for new Pinterest images
+      if (parsed.homeFeatureImage === 'https://images.unsplash.com/photo-1516054575922-f0b8eeadec1a?q=80&w=1374&auto=format&fit=crop') {
+        parsed.homeFeatureImage = 'https://i.pinimg.com/736x/47/01/77/470177b9b31fe2b0f2a4b12dc7912f6d.jpg';
+      }
+      if (parsed.heroImage === 'https://images.unsplash.com/photo-1606830733744-0ad778449672?q=80&w=2000&auto=format&fit=crop') {
+        parsed.heroImage = 'https://i.pinimg.com/736x/71/ae/65/71ae65fb2265bfdde8e423a87be501df.jpg';
+      }
+      setSettings(parsed);
+    }
 
     setIsLoading(false);
   }, []);
