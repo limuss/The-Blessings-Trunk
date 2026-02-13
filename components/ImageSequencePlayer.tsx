@@ -8,6 +8,7 @@ interface ImageSequencePlayerProps {
     fps?: number;
     className?: string;
     loop?: boolean;
+    placeholderFrame?: number;
 }
 
 const ImageSequencePlayer: React.FC<ImageSequencePlayerProps> = ({
@@ -17,10 +18,12 @@ const ImageSequencePlayer: React.FC<ImageSequencePlayerProps> = ({
     fps = 30,
     className = '',
     loop = true,
+    placeholderFrame,
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [placeholderLoaded, setPlaceholderLoaded] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const frameRef = useRef(0);
     const requestRef = useRef<number>(0);
@@ -47,20 +50,67 @@ const ImageSequencePlayer: React.FC<ImageSequencePlayerProps> = ({
         let loadedCount = 0;
         const loadedImages: HTMLImageElement[] = [];
 
-        for (let i = 1; i <= frameCount; i++) {
-            const img = new Image();
-            const frameNumber = i.toString().padStart(3, '0');
-            img.src = `${basePath}${frameNumber}${extension}`;
-            img.onload = () => {
-                loadedCount++;
-                if (loadedCount === frameCount) {
-                    setIsLoaded(true);
+        // Function to handle full loading
+        const startFullPreload = () => {
+            for (let i = 1; i <= frameCount; i++) {
+                const img = new Image();
+                const frameNumber = i.toString().padStart(3, '0');
+                img.src = `${basePath}${frameNumber}${extension}`;
+                img.onload = () => {
+                    loadedCount++;
+                    if (loadedCount === frameCount) {
+                        setIsLoaded(true);
+                    }
+                };
+                loadedImages.push(img);
+            }
+            setImages(loadedImages);
+        };
+
+        if (placeholderFrame) {
+            const pImg = new Image();
+            const pFrameNumber = placeholderFrame.toString().padStart(3, '0');
+            pImg.src = `${basePath}${pFrameNumber}${extension}`;
+            pImg.onload = () => {
+                setPlaceholderLoaded(true);
+                startFullPreload();
+            };
+        } else {
+            startFullPreload();
+        }
+    }, [basePath, frameCount, extension, placeholderFrame]);
+
+    // Initial render for placeholder
+    useEffect(() => {
+        if (placeholderLoaded && !isLoaded && canvasRef.current && placeholderFrame) {
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            const pImg = new Image();
+            const pFrameNumber = placeholderFrame.toString().padStart(3, '0');
+            pImg.src = `${basePath}${pFrameNumber}${extension}`;
+            pImg.onload = () => {
+                if (ctx) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    const imgAspect = pImg.width / pImg.height;
+                    const canvasAspect = canvas.width / canvas.height;
+                    let drawWidth, drawHeight, offsetX, offsetY;
+
+                    if (imgAspect > canvasAspect) {
+                        drawHeight = canvas.height;
+                        drawWidth = canvas.height * imgAspect;
+                        offsetX = (canvas.width - drawWidth) / 2;
+                        offsetY = 0;
+                    } else {
+                        drawWidth = canvas.width;
+                        drawHeight = canvas.width / imgAspect;
+                        offsetX = 0;
+                        offsetY = (canvas.height - drawHeight) / 2;
+                    }
+                    ctx.drawImage(pImg, offsetX, offsetY, drawWidth, drawHeight);
                 }
             };
-            loadedImages.push(img);
         }
-        setImages(loadedImages);
-    }, [basePath, frameCount, extension]);
+    }, [placeholderLoaded, isLoaded, basePath, extension, placeholderFrame]);
 
     // Animation Loop
     const animate = (time: number) => {
@@ -134,11 +184,11 @@ const ImageSequencePlayer: React.FC<ImageSequencePlayerProps> = ({
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [isLoaded]);
+    }, [isLoaded, placeholderLoaded]);
 
     return (
         <div className={`relative w-full h-full overflow-hidden ${className}`}>
-            {!isLoaded && (
+            {!isLoaded && !placeholderLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
                     {/* Placeholder while loading */}
                     <div className="w-8 h-8 border-4 border-[#A67C37] border-t-transparent rounded-full animate-spin"></div>
@@ -146,7 +196,7 @@ const ImageSequencePlayer: React.FC<ImageSequencePlayerProps> = ({
             )}
             <canvas
                 ref={canvasRef}
-                className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded || placeholderLoaded ? 'opacity-100' : 'opacity-0'}`}
             />
         </div>
     );

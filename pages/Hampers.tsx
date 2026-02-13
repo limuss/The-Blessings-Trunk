@@ -85,6 +85,15 @@ const Hampers: React.FC = () => {
                           className="w-full h-full"
                           fps={30}
                         />
+                      ) : h.name === 'Eid Special' ? (
+                        <ImageSequencePlayer
+                          basePath="/eid-special-sequence/ezgif-frame-"
+                          frameCount={75}
+                          extension=".jpg"
+                          className="w-full h-full"
+                          fps={30}
+                          placeholderFrame={38}
+                        />
                       ) : (
                         <img src={h.image} alt={h.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                       )}
