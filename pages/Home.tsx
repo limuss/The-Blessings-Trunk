@@ -46,7 +46,7 @@ const Home: React.FC = () => {
           <div className="absolute -inset-4 border border-[#E8DFD0] rounded transition-transform group-hover:scale-105"></div>
           <img
             src={settings.homeFeatureImage}
-            alt="Wooden Trunk Feature"
+            alt="Handcrafted Basket Feature"
             className="relative rounded shadow-2xl w-full h-[450px] object-cover"
           />
         </div>
@@ -116,9 +116,9 @@ const Home: React.FC = () => {
             <h2 className="text-4xl md:text-5xl serif mb-4">Visit Our Boutiques</h2>
             <p className="text-[#D9C8B8] italic">Experience the warmth of our handcrafted heritage in person.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="flex justify-center flex-wrap gap-8 md:gap-12">
             {settings.shops.map((shop, idx) => (
-              <div key={shop.id} className="bg-[#4A3728] p-8 rounded-3xl border border-[#5C4233] hover:border-[#A67C37] transition-all group">
+              <div key={shop.id} className="bg-[#4A3728] p-8 rounded-3xl border border-[#5C4233] hover:border-[#A67C37] transition-all group w-full max-w-sm">
                 <div className="text-[#A67C37] mb-6 flex justify-between items-start">
                   <div className="w-12 h-12 bg-[#3D2B1F] rounded-full flex items-center justify-center text-xl font-bold">{idx + 1}</div>
                   <svg className="w-6 h-6 opacity-40 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>

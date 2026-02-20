@@ -8,7 +8,7 @@ const About: React.FC = () => {
   return (
     <div className="bg-[#FDFBF7]">
       <section className="py-24 px-6 md:px-12 text-center bg-[#F7F3EC]">
-        <h1 className="text-5xl md:text-7xl serif text-[#3D2B1F] mb-6 italic">The Soul of the Trunk</h1>
+        <h1 className="text-5xl md:text-7xl serif text-[#3D2B1F] mb-6 italic">The Soul of the Basket</h1>
         <p className="text-xl serif text-[#6B513E] uppercase tracking-widest">Handcrafted in Jammu & Kashmir</p>
       </section>
 
@@ -25,15 +25,15 @@ const About: React.FC = () => {
             </p>
           </div>
           <div className="relative">
-             <div className="absolute -inset-4 border border-[#E8DFD0] rounded-lg"></div>
-             <img src="https://images.unsplash.com/photo-1541339907198-e08759df9a73?q=80&w=1470&auto=format&fit=crop" alt="Kashmir" className="relative rounded-lg shadow-2xl z-10" />
+            <div className="absolute -inset-4 border border-[#E8DFD0] rounded-lg"></div>
+            <img src="https://images.unsplash.com/photo-1541339907198-e08759df9a73?q=80&w=1470&auto=format&fit=crop" alt="Kashmir" className="relative rounded-lg shadow-2xl z-10" />
           </div>
         </div>
 
         <div className="bg-[#3D2B1F] text-[#FDFBF7] p-12 md:p-20 rounded-3xl text-center space-y-8 shadow-2xl">
           <h2 className="text-4xl serif">Premium Quality, Roots Deep in J&K</h2>
           <p className="text-xl text-[#D9C8B8] max-w-2xl mx-auto leading-relaxed italic">
-            From the crisp air of our orchards to the meticulous bow tied around your trunk.
+            From the crisp air of our orchards to the meticulous bow tied around your basket.
           </p>
           <blockquote className="text-3xl serif italic text-[#A67C37] py-8">
             "{settings.aboutQuote}"

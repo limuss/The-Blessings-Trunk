@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import ImageSequencePlayer from '../components/ImageSequencePlayer';
 
 const Hampers: React.FC = () => {
-  const { hampers, toggleCart, toggleWishlist, cart, wishlist } = useStore();
+  const { hampers, toggleCart, toggleWishlist, cart, wishlist, settings } = useStore();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [modalState, setModalState] = useState<{ open: boolean; product?: string }>({ open: false });
@@ -126,6 +126,36 @@ const Hampers: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+      <section className="py-24 bg-[#3D2B1F] text-[#FDFBF7] px-6 md:px-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl serif mb-4">Visit Us</h2>
+            <p className="text-[#D9C8B8] italic">Pick up your blessings or consult with our experts at our boutique locations.</p>
+          </div>
+          <div className="flex justify-center flex-wrap gap-8 md:gap-12">
+            {settings.shops.map((shop, idx) => (
+              <div key={shop.id} className="bg-[#4A3728] p-8 rounded-3xl border border-[#5C4233] hover:border-[#A67C37] transition-all group w-full max-w-sm text-left">
+                <div className="text-[#A67C37] mb-6 flex justify-between items-start">
+                  <div className="w-12 h-12 bg-[#3D2B1F] rounded-full flex items-center justify-center text-xl font-bold">{idx + 1}</div>
+                  <svg className="w-6 h-6 opacity-40 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </div>
+                <h3 className="text-2xl serif mb-4">{shop.name}</h3>
+                <p className="text-[#D9C8B8] leading-relaxed mb-6 italic">{shop.address}</p>
+                <div className="flex space-x-4">
+                  <a
+                    href={`https://www.google.com/maps?q=${shop.lat},${shop.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs uppercase tracking-widest font-bold text-[#A67C37] hover:text-white transition-colors"
+                  >
+                    Get Directions
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

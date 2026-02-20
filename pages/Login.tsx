@@ -31,7 +31,7 @@ const Login: React.FC = () => {
     <div className="min-h-[80vh] flex items-center justify-center bg-[#FDFBF7] p-6">
       <div className="bg-white p-10 rounded-3xl shadow-2xl border border-[#E8DFD0] w-full max-w-md">
         <h2 className="text-3xl serif text-[#3D2B1F] text-center mb-8">
-          {isRegister ? 'Join the Trunk' : 'Welcome Back'}
+          {isRegister ? 'Join the Basket' : 'Welcome Back'}
         </h2>
 
         {error && <div className="mb-4 text-xs text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">{error}</div>}
