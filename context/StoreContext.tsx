@@ -330,13 +330,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     if (savedSettings) {
       const parsed = JSON.parse(savedSettings);
-      // Migration for new Pinterest images
-      if (parsed.homeFeatureImage === 'https://images.unsplash.com/photo-1516054575922-f0b8eeadec1a?q=80&w=1374&auto=format&fit=crop') {
-        parsed.homeFeatureImage = 'https://i.pinimg.com/736x/47/01/77/470177b9b31fe2b0f2a4b12dc7912f6d.jpg';
+      // Migration for shop locations
+      if (!parsed.shops || parsed.shops.length < 2 || parsed.shops.some((s: any) => s.name.includes('Flagship'))) {
+        parsed.shops = defaultSettings.shops;
       }
-      if (parsed.heroImage === 'https://images.unsplash.com/photo-1606830733744-0ad778449672?q=80&w=2000&auto=format&fit=crop') {
-        parsed.heroImage = 'https://i.pinimg.com/736x/71/ae/65/71ae65fb2265bfdde8e423a87be501df.jpg';
-      }
+
+      // Migration for brand name
+      if (parsed.heroTitle === 'The Blessings Trunk') parsed.heroTitle = defaultSettings.heroTitle;
+      if (parsed.aboutText1?.includes('The Blessings Trunk')) parsed.aboutText1 = defaultSettings.aboutText1;
+
       setSettings(parsed);
     }
 
