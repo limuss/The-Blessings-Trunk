@@ -30,21 +30,22 @@ interface StoreContextType {
 const defaultSettings: SiteSettings = {
   phoneNumber: '+91 88990 43549',
   whatsappNumber: '8899043549',
-  ownerEmail: 'theblessingstrunk@gmail.com',
+  ownerEmail: 'theblessingsbasket@gmail.com',
   proprietorName: 'Azhar Majeed',
   instagramUrl: '#',
   facebookUrl: '#',
   twitterUrl: '#',
-  heroTitle: 'The Blessings Trunk',
+  heroTitle: 'The Blessings Basket',
   heroSubtitle: 'A trunk full of love, warmth & heartfelt wishes',
   heroImage: 'https://i.pinimg.com/736x/71/ae/65/71ae65fb2265bfdde8e423a87be501df.jpg',
   homeFeatureImage: 'https://i.pinimg.com/736x/47/01/77/470177b9b31fe2b0f2a4b12dc7912f6d.jpg',
   aboutTitle: 'Gifting with Emotion',
-  aboutText1: 'The Blessings Trunk facilitates blessings through premium handcrafted Kashmiri dry fruit hampers.',
+  aboutText1: 'The Blessings Basket facilitates blessings through premium handcrafted Kashmiri dry fruit hampers.',
   aboutText2: 'Every thread of saffron is sourced with reverence for our heritage.',
   aboutQuote: 'Facilitating blessings, one trunk at a time.',
   shops: [
-    { id: 'shop-1', name: 'Srinagar Flagship', address: 'NST Complex, 1st Floor, Residency Road, Srinagar, J&K', lat: 34.0754, lng: 74.8142 },
+    { id: 'shop-1', name: 'Main Office', address: 'NST building Ground floor, near Jamia Masjid, Thathri, Doda, J&K 182203', lat: 33.1368, lng: 75.7611 },
+    { id: 'shop-2', name: 'Srinagar Branch', address: 'Malik Sahib Soura, near Albaik, Srinagar 190001', lat: 34.1287, lng: 74.8016 },
   ]
 };
 

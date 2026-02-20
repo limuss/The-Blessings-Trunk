@@ -22,7 +22,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
 
     try {
       // Direct WhatsApp communication
-      const message = `🎁 *Product:* ${productName || 'Custom Request'}\n📧 *Email:* ${formData.email}\n📱 *WhatsApp:* ${formData.whatsapp}\n\n_Sent from The Blessings Trunk_`;
+      const message = `🎁 *Product:* ${productName || 'Custom Request'}\n📧 *Email:* ${formData.email}\n📱 *WhatsApp:* ${formData.whatsapp}\n\n_Sent from The Blessings Basket_`;
       const encodedMsg = encodeURIComponent(message);
 
       window.open(`https://wa.me/${settings.whatsappNumber}?text=${encodedMsg}`, '_blank');
@@ -57,7 +57,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, productName })
 
           <div className="text-center relative z-10 px-6">
             <h2 className="text-3xl md:text-4xl serif text-[#FDFBF7] italic mb-1">Blessing Inquiry</h2>
-            <p className="text-[10px] uppercase tracking-[0.4em] text-[#A67C37] font-bold">The Blessings Trunk</p>
+            <p className="text-[10px] uppercase tracking-[0.4em] text-[#A67C37] font-bold">The Blessings Basket</p>
           </div>
 
           <button onClick={onClose} className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">

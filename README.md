@@ -1,4 +1,4 @@
-# 🎁 The Blessings Trunk
+# 🎁 The Blessings Basket
 
 A premium, interactive e-commerce platform for high-quality dry fruits and curated festive hampers. Designed with a focus on visual excellence and smooth user experience.
 
@@ -46,7 +46,7 @@ The site features custom-built **Image Sequence Animations** for flagship produc
 ## 🚀 Getting Started
 
 ### Local Development
-1. Clone the repository: `git clone https://github.com/[USER]/The-Blessings-Trunk.git`
+1. Clone the repository: `git clone https://github.com/[USER]/The-Blessings-Basket.git`
 2. Install dependencies: `npm install`
 3. Run dev server: `npm run dev`
 
@@ -70,4 +70,4 @@ firebase deploy --only hosting
 
 ---
 
-*Hand-crafted with care for The Blessings Trunk.*
+*Hand-crafted with care for The Blessings Basket.*

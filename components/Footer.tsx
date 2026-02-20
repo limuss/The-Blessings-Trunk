@@ -11,9 +11,9 @@ const Footer: React.FC = () => {
         <div>
           <h3 className="text-2xl serif mb-6 italic">Visit Us</h3>
           <p className="text-[#D9C8B8] leading-relaxed">
-            NST Complex, 1st Floor<br />
-            Residency Road, Srinagar<br />
-            Jammu & Kashmir, 190001
+            NST building Ground floor<br />
+            Near Jamia Masjid, Thathri, Doda<br />
+            Jammu & Kashmir, 182203
           </p>
         </div>
         <div>
@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
         </div>
       </div>
       <div className="max-w-7xl mx-auto pt-8 border-t border-[#5C4233] text-center text-sm text-[#8B735B]">
-        &copy; {new Date().getFullYear()} The Blessings Trunk. All rights reserved. Handcrafted in Kashmir.
+        &copy; {new Date().getFullYear()} The Blessings Basket. All rights reserved. Handcrafted in Kashmir.
       </div>
     </footer>
   );

@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 
 export const getGeminiResponse = async (userMessage: string, history: { role: 'user' | 'model', text: string }[]) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
+
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -19,11 +19,11 @@ export const getGeminiResponse = async (userMessage: string, history: { role: 'u
       ],
       config: {
         tools: [{ googleMaps: {} }],
-        systemInstruction: `You are 'Trunk Assistant', the helpful concierge for 'The Blessings Trunk' - a premium dry fruit hamper shop from Jammu & Kashmir.
+        systemInstruction: `You are 'Basket Assistant', the helpful concierge for 'The Blessings Basket' - a premium dry fruit hamper shop from Jammu & Kashmir.
         
         Your goals are:
         1. Welcome the user warmly.
-        2. Help them find our boutiques in Kashmir. We have shops in Srinagar (NST Complex), Gulmarg (Main Market), and Pahalgam (Market Square).
+        2. Help them find our boutiques. We have our Main Office in Thathri (Doda) at the NST building (Ground floor, near Jamia Masjid) and a Branch in Srinagar (Malik Sahib Soura, near Albaik).
         3. Recommend specific hampers based on their needs.
         
         Our collection includes:

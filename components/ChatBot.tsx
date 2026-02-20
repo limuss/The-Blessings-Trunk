@@ -14,7 +14,7 @@ const HAMPER_IMAGES: Record<string, string> = {
 const ChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'model', text: "Welcome to The Blessings Trunk! I'm here to help you find the perfect gift. What occasion are you planning for?" }
+    { role: 'model', text: "Welcome to The Blessings Basket! I'm here to help you find the perfect gift. What occasion are you planning for?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -45,13 +45,13 @@ const ChatBot: React.FC = () => {
 
     const aiResponse = await getGeminiResponse(input, messages);
     const imageUrl = findRecommendedImage(aiResponse);
-    
-    const modelMsg: Message = { 
-      role: 'model', 
+
+    const modelMsg: Message = {
+      role: 'model',
       text: aiResponse,
       imageUrl: imageUrl
     };
-    
+
     setMessages(prev => [...prev, modelMsg]);
     setIsLoading(false);
   };
@@ -62,7 +62,7 @@ const ChatBot: React.FC = () => {
         <div className="bg-white w-[350px] md:w-[400px] h-[500px] shadow-2xl rounded-2xl flex flex-col overflow-hidden border border-[#E8DFD0] mb-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="bg-[#3D2B1F] p-4 text-white flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-[#A67C37] flex items-center justify-center text-xs serif italic">BT</div>
+              <div className="w-8 h-8 rounded-full bg-[#A67C37] flex items-center justify-center text-xs serif italic">BB</div>
               <div>
                 <h3 className="font-medium serif tracking-wide">Trunk Assistant</h3>
                 <p className="text-[10px] text-[#D9C8B8] uppercase tracking-widest">Always here for you</p>
@@ -76,11 +76,10 @@ const ChatBot: React.FC = () => {
           <div ref={scrollRef} className="flex-grow overflow-y-auto p-4 space-y-4 bg-[#FDFBF7]">
             {messages.map((m, idx) => (
               <div key={idx} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
-                <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                  m.role === 'user' 
-                  ? 'bg-[#A67C37] text-white rounded-tr-none' 
-                  : 'bg-white text-[#4A3728] border border-[#E8DFD0] rounded-tl-none'
-                }`}>
+                <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${m.role === 'user'
+                    ? 'bg-[#A67C37] text-white rounded-tr-none'
+                    : 'bg-white text-[#4A3728] border border-[#E8DFD0] rounded-tl-none'
+                  }`}>
                   {m.imageUrl && (
                     <div className="mb-3 overflow-hidden rounded-lg">
                       <img src={m.imageUrl} alt="Recommended Hamper" className="w-full h-32 object-cover" />
@@ -100,15 +99,15 @@ const ChatBot: React.FC = () => {
           </div>
 
           <div className="p-4 bg-white border-t border-[#E8DFD0] flex space-x-2">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Type your message..."
               className="flex-grow border border-[#E8DFD0] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#A67C37]"
             />
-            <button 
+            <button
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
               className="bg-[#A67C37] text-white p-2 rounded-full hover:bg-[#8B672E] transition-colors disabled:opacity-50"
@@ -119,7 +118,7 @@ const ChatBot: React.FC = () => {
         </div>
       )}
 
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-[#3D2B1F] hover:bg-[#A67C37] text-white w-16 h-16 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-105 active:scale-95"
       >

@@ -38,7 +38,7 @@ const Order: React.FC = () => {
   };
 
   const generateWhatsappUrl = (ans: Record<string, string>) => {
-    const summary = `✨ *New Blessing Request* ✨\n\n🎁 *Occasion:* ${ans.occasion}\n👤 *For:* ${ans.recipient}\n🌟 *Style:* ${ans.preference}\n📝 *Notes:* ${ans.requirements}\n📞 *Contact:* ${ans.phone}\n\n_Sent via The Blessings Trunk Website_`;
+    const summary = `✨ *New Blessing Request* ✨\n\n🎁 *Occasion:* ${ans.occasion}\n👤 *For:* ${ans.recipient}\n🌟 *Style:* ${ans.preference}\n📝 *Notes:* ${ans.requirements}\n📞 *Contact:* ${ans.phone}\n\n_Sent via The Blessings Basket Website_`;
     const encoded = encodeURIComponent(summary);
     setWhatsappUrl(`https://wa.me/${settings.whatsappNumber}?text=${encoded}`);
   };

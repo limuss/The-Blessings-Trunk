@@ -13,13 +13,13 @@ const Navbar: React.FC = () => {
     <nav className="sticky top-0 z-50 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-[#E8DFD0] py-4 px-6 md:px-12">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <Link to="/" className="text-2xl md:text-3xl font-bold serif text-[#3D2B1F]">
-          The Blessings Trunk
+          The Blessings Basket
         </Link>
-        
+
         <div className="hidden md:flex items-center space-x-8 text-sm font-medium uppercase tracking-widest text-[#6B513E]">
           <Link to="/" className="hover:text-[#A67C37]">Home</Link>
           <Link to="/hampers" className="hover:text-[#A67C37]">Hampers</Link>
-          
+
           {isAdmin ? (
             <Link to="/admin" className="text-[#A67C37] font-bold">Admin Panel</Link>
           ) : (
