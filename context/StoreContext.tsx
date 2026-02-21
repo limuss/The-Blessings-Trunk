@@ -330,14 +330,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     if (savedSettings) {
       const parsed = JSON.parse(savedSettings);
-      // Migration for shop locations
-      if (!parsed.shops || parsed.shops.length < 2 || parsed.shops.some((s: any) => s.name.includes('Flagship'))) {
+
+      // Migration for shop locations - Robust check for Thathri and Srinagar (Soura)
+      const hasThathri = parsed.shops?.some((s: any) => s.address.includes('Thathri'));
+      const hasSrinagar = parsed.shops?.some((s: any) => s.address.includes('Soura'));
+
+      if (!parsed.shops || parsed.shops.length !== 2 || !hasThathri || !hasSrinagar) {
         parsed.shops = defaultSettings.shops;
       }
 
-      // Migration for brand name
-      if (parsed.heroTitle === 'The Blessings Trunk') parsed.heroTitle = defaultSettings.heroTitle;
-      if (parsed.aboutText1?.includes('The Blessings Trunk')) parsed.aboutText1 = defaultSettings.aboutText1;
+      // Migration for brand name - Force strict matching
+      if (parsed.heroTitle !== defaultSettings.heroTitle) parsed.heroTitle = defaultSettings.heroTitle;
+      if (!parsed.aboutText1?.includes('The Blessings Basket')) parsed.aboutText1 = defaultSettings.aboutText1;
 
       setSettings(parsed);
     }
