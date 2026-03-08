@@ -376,6 +376,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         shikaraDelight.image = 'https://i.pinimg.com/736x/8b/c5/89/8bc589b14ca4495dc3e800b718828211.jpg';
       }
       setHampers(parsed);
+
+      // Merge Migration: Ensure new products from defaultHampers are added to existing localStorage
+      const defaultIds = defaultHampers.map(h => h.id);
+      const currentIds = parsed.map((h: any) => h.id);
+      const missingHampers = defaultHampers.filter(h => !currentIds.includes(h.id));
+
+      if (missingHampers.length > 0) {
+        setHampers(prev => [...prev, ...missingHampers]);
+      }
+
     }
     if (savedOccasions) {
       const parsed = JSON.parse(savedOccasions);
