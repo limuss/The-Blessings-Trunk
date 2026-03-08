@@ -34,7 +34,18 @@ const Footer: React.FC = () => {
         </div>
       </div>
       <div className="max-w-7xl mx-auto pt-8 border-t border-[#5C4233] text-center text-sm text-[#8B735B]">
-        &copy; {new Date().getFullYear()} The Blessings Basket. All rights reserved. Handcrafted in Kashmir.
+        <div>&copy; {new Date().getFullYear()} The Blessings Basket. All rights reserved. Handcrafted in Kashmir.</div>
+        <div className="mt-2 text-[#D9C8B8]">
+          Site developed and designed by{" "}
+          <a
+            href="https://www.linkedin.com/in/muslim-nazir-506b56290/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[#A67C37] transition-colors font-medium underline underline-offset-4"
+          >
+            Muslim Nazir Lone
+          </a>
+        </div>
       </div>
     </footer>
   );
