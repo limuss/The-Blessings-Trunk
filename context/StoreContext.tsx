@@ -28,8 +28,8 @@ interface StoreContextType {
 }
 
 const defaultSettings: SiteSettings = {
-  phoneNumber: '+91 88990 43549',
-  whatsappNumber: '8899043549',
+  phoneNumber: '+91 7006701140',
+  whatsappNumber: '7006701140',
   ownerEmail: 'theblessingsbasket@gmail.com',
   proprietorName: 'Azhar Majeed',
   instagramUrl: '#',
@@ -269,6 +269,72 @@ const defaultHampers: Hamper[] = [
     showOnHome: false,
     showOnHampers: true,
     isSuggested: false
+  },
+  {
+    id: 'hamp-18',
+    name: 'Premium Dry Fruit Basket',
+    description: 'A luxurious variety of premium nuts and chocolates including whole almonds, cashews, walnuts, and pistachios. Features gold-wrapped Ferrero Rocher and variety chocolates, elegantly wrapped in lavender net fabric with a silky bow.',
+    price: '1550',
+    image: 'https://i.pinimg.com/736x/af/3f/de/af3fdecfc5ed979dfad93ab0af8b827f.jpg',
+    category: 'Gifting',
+    showOnHome: true,
+    showOnHampers: true,
+    isSuggested: true
+  },
+  {
+    id: 'hamp-19',
+    name: 'Nikkah Pen',
+    description: 'Elegant decorative Nikkah pens featuring large white feathers. Each pen is topped with a gold heart-shaped ornament featuring "Qabool Hai" calligraphy. Decorated with a rich maroon rose, a gold ribbon bow, and delicate white pearl accents.',
+    price: '240',
+    image: 'https://i.pinimg.com/736x/8b/a1/2f/8ba12f17d2461f996cdb2ed949064e73.jpg',
+    category: 'Wedding',
+    showOnHome: true,
+    showOnHampers: true,
+    isSuggested: true
+  },
+  {
+    id: 'hamp-20',
+    name: 'Embroided Velvet Potli',
+    description: 'A beautifully embroidered velvet potli bag, perfect for elegant gifting and celebratory favors.',
+    price: '45',
+    image: 'https://i.pinimg.com/736x/69/16/20/691620a458a17e2b99a26675e87324a2.jpg',
+    category: 'Gifting',
+    showOnHome: true,
+    showOnHampers: true,
+    isSuggested: true
+  },
+  {
+    id: 'hamp-21',
+    name: 'Money Flower Bouquet',
+    description: 'A unique and customizable gift bouquet featuring money flowers, tailored for your specific budget and special occasions.',
+    price: '800',
+    image: 'https://i.pinimg.com/736x/05/2d/39/052d393849a09e487921e85f69b6bce0.jpg',
+    category: 'Gifting',
+    showOnHome: true,
+    showOnHampers: true,
+    isSuggested: true
+  },
+  {
+    id: 'hamp-22',
+    name: 'Embroided Round Potli',
+    description: 'Intricately designed round potli bag with beautiful floral patterns, ideal for weddings and traditional events.',
+    price: '130',
+    image: 'https://i.pinimg.com/736x/29/33/a6/2933a63ffca8f6299f398cbdc89fa5a8.jpg',
+    category: 'Wedding',
+    showOnHome: true,
+    showOnHampers: true,
+    isSuggested: true
+  },
+  {
+    id: 'hamp-23',
+    name: 'Premium Wedding Boxes',
+    description: 'Decorative wedding gift boxes featuring glass jars inside an elegant wooden-style finish. Perfect for sweets and luxury favors.',
+    price: '230',
+    image: 'https://i.pinimg.com/736x/97/b2/dd/97b2dd122b8bd202d75f01606bb8e8d9.jpg',
+    category: 'Wedding',
+    showOnHome: true,
+    showOnHampers: true,
+    isSuggested: true
   }
 ];
 
@@ -342,6 +408,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Migration for brand name - Force strict matching
       if (parsed.heroTitle !== defaultSettings.heroTitle) parsed.heroTitle = defaultSettings.heroTitle;
       if (!parsed.aboutText1?.includes('The Blessings Basket')) parsed.aboutText1 = defaultSettings.aboutText1;
+
+      // Migration for WhatsApp number - Force update to new number
+      if (parsed.whatsappNumber !== defaultSettings.whatsappNumber) {
+        parsed.whatsappNumber = defaultSettings.whatsappNumber;
+        parsed.phoneNumber = defaultSettings.phoneNumber;
+      }
 
       setSettings(parsed);
     }
